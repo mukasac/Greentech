@@ -1,0 +1,235 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  password  String
+  startups  Startup[]
+  roleId    Int
+  role      Role      @relation(fields: [roleId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Role {
+  id          Int             @id @default(autoincrement())
+  name        String          @unique
+  permissions RolePermission[]
+  users       User[]
+}
+
+model Permission {
+  id    Int             @id @default(autoincrement())
+  name  String          @unique // Add CREATE_BLOG_POST, MANAGE_GALLERY to this
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+}
+
+model Startup {
+  id             String    @id @default(cuid())
+  name           String
+  description    String
+  logo           String    @default("/placeholder-logo.png")
+  profileImage   String    @default("/placeholder-profile.jpg")
+  mainCategory   String    @default("renewable-energy")
+  subcategories  String[]  @default([])
+  country        String    @default("norway")
+  founded        Int
+  website        String
+  funding        String
+  employees      String
+  tags           String[]  @default([])
+  status         String    @default("active") // active, pending, archived
+  featured       Boolean   @default(false)
+  sustainability Json?     // Store sustainability data as JSON
+  viewCount      Int       @default(0)        // Track profile views
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  team           Team[]
+  gallery        Gallery[]
+  jobs           Job[]
+  blogPosts      BlogPost[]
+  documents      Document[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  image     String
+  bio       String?
+  linkedin  String?
+  twitter   String?
+  startupId String
+  startup   Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Gallery {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  caption   String?
+  isPrimary Boolean  @default(false)
+  startupId String
+  startup   Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  type      String   // pdf, spreadsheet, document, image, etc.
+  size      String?  // File size - stored as string (e.g., "1.2 MB")
+  shared    Boolean  @default(false)
+  startupId String
+  startup   Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Job {
+  id               String   @id @default(cuid())
+  title            String
+  type             String   // full-time, part-time, contract, internship
+  experienceLevel  String   // entry, mid, senior, lead, executive
+  location         Json     // {type: remote/hybrid/on-site, city?: string, country: string}
+  salary           Json     // {min: number, max: number, currency: string}
+  description      String   @db.Text
+  requirements     String[] // Array of requirement strings 
+  responsibilities String[] // Array of responsibility strings
+  skills           String[] // Array of required skills
+  department       String
+  applicationUrl   String
+  status           String   @default("active") // active, filled, expired
+  applicationCount Int      @default(0)
+  viewCount        Int      @default(0)
+  startupId        String
+  startup          Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  applications     JobApplication[]
+  postedAt         DateTime @default(now())
+  expiresAt        DateTime?
+  updatedAt        DateTime @updatedAt
+}
+
+model JobApplication {
+  id           String   @id @default(cuid())
+  jobId        String
+  job          Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateName String
+  email        String
+  resumeUrl    String
+  coverLetter  String?  @db.Text
+  status       String   @default("new") // new, reviewing, interview, offer, rejected
+  notes        String?  @db.Text
+  appliedAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String
+  content     String   @db.Text
+  excerpt     String
+  coverImage  String
+  author      Json     // {name: string, role: string, avatar: string}
+  tags        String[]
+  publishedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  status      String   @default("draft") // draft, published, archived
+  readTime    Int      @default(5)       // Estimated read time in minutes
+  viewCount   Int      @default(0)
+  startupId   String
+  startup     Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  comments    BlogComment[]
+}
+
+model BlogComment {
+  id        String   @id @default(cuid())
+  blogId    String
+  blog      BlogPost @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  content   String   @db.Text
+  status    String   @default("pending") // pending, approved, rejected
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id           String        @id @default(cuid())
+  title        String
+  slug         String        @unique
+  description  String        @db.Text
+  type         String
+  date         DateTime
+  location     String
+  attendees    Int           @default(0)
+  maxAttendees Int?
+  price        Json?         // {amount: number, currency: string}
+  organizer    Json         // {name: string, logo?: string}
+  region       String
+  tags         String[]
+  registrations EventRegistration[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model EventRegistration {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name        String
+  email       String
+  company     String?
+  registeredAt DateTime @default(now())
+  status      String   @default("confirmed") // confirmed, cancelled, attended
+}
+
+model News {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String
+  content     String   @db.Text
+  image       String
+  tags        String[]
+  region      String
+  source      String?
+  authorId    String?
+  publishedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Track startup metrics
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String   // view, follow, share, comment
+  startupId String
+  userId    String?  // Anonymous events won't have a user ID
+  metadata  Json?    // Additional event data
+  createdAt DateTime @default(now())
+}
