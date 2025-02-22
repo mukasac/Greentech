@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { StartupImage } from "@/lib/types/startup";
+import { GalleryImage } from "@/lib/types/startup";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 interface StartupGalleryProps {
-  images: StartupImage[];
+  images: GalleryImage[];
 }
 
 export function StartupGallery({ images }: StartupGalleryProps) {
-  const [selectedImage, setSelectedImage] = useState<StartupImage | null>(null);
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handlePrevious = () => {
@@ -34,11 +35,14 @@ export function StartupGallery({ images }: StartupGalleryProps) {
             }}
             className="group relative aspect-square overflow-hidden rounded-lg"
           >
-            <img
-              src={image.url}
-              alt={image.alt}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-            />
+            <div className="relative h-full w-full">
+              <Image
+                src={image.url}
+                alt={image.alt || 'Gallery image'}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-110"
+              />
+            </div>
             {image.caption && (
               <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
                 <p className="text-sm text-white">{image.caption}</p>
@@ -54,11 +58,15 @@ export function StartupGallery({ images }: StartupGalleryProps) {
       >
         <DialogContent className="max-w-4xl">
           <div className="relative aspect-video">
-            <img
-              src={images[currentIndex]?.url}
-              alt={images[currentIndex]?.alt}
-              className="h-full w-full object-contain"
-            />
+            <div className="relative h-full w-full">
+              <Image
+                src={images[currentIndex]?.url}
+                alt={images[currentIndex]?.alt || 'Gallery image'}
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
             <Button
               variant="outline"
               size="icon"

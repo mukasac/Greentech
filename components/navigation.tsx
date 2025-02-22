@@ -1,3 +1,4 @@
+// components/navigation.tsx
 "use client";
 
 import * as React from "react";
@@ -29,6 +30,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const components: { title: string; href: string; description: string }[] = [
   {
@@ -66,6 +68,7 @@ const components: { title: string; href: string; description: string }[] = [
 export function Navigation() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { hasPermission } = usePermissions();
 
   const getInitials = (name: string | null | undefined): string => {
     if (!name) return "";
@@ -184,10 +187,15 @@ export function Navigation() {
                   </Tooltip>
                 </TooltipProvider>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
+                  {hasPermission("ADMIN_ACCESS") && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/startups/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem asChild>
                     <Link href="/profile">Profile</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link href="/settings">Settings</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
@@ -195,11 +203,14 @@ export function Navigation() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Link href="/roles/roleManagement">
-                <button className="flex items-center justify-center p-2 text-white rounded-md hover:bg-slate-700 transition-colors">
-                  <UserCog className="h-5 w-5" />
-                </button>
-              </Link>
+              
+              {hasPermission("ADMIN_ACCESS") && (
+                <Link href="/roles/roleManagement">
+                  <button className="flex items-center justify-center p-2 text-white rounded-md hover:bg-slate-700 transition-colors">
+                    <UserCog className="h-5 w-5" />
+                  </button>
+                </Link>
+              )}
             </div>
           ) : null}
         </div>

@@ -1,4 +1,3 @@
-// app/api/startups/[id]/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
@@ -14,14 +13,41 @@ export async function GET(
       where: { id: startupId },
       include: {
         team: true,
-        gallery: true,
+        gallery: {
+          orderBy: {
+            createdAt: 'desc'
+          }
+        },
         jobs: {
           where: { status: "active" },
-          orderBy: { postedAt: "desc" }
+          orderBy: { postedAt: 'desc' },
+          include: {
+            applications: {
+              select: {
+                id: true,
+                status: true
+              }
+            }
+          }
         },
         blogPosts: {
           where: { status: "published" },
-          orderBy: { publishedAt: "desc" }
+          orderBy: { publishedAt: 'desc' },
+          include: {
+            comments: {
+              where: { status: "approved" },
+              select: {
+                id: true,
+                content: true,
+                createdAt: true,
+                name: true
+              }
+            }
+          }
+        },
+        documents: {
+          where: { shared: true },
+          orderBy: { createdAt: 'desc' }
         }
       }
     });
@@ -33,21 +59,27 @@ export async function GET(
       );
     }
 
-    // Add analytics if available
-    const analytics = await db.analyticsEvent.findMany({
-      where: {
-        startupId,
-        createdAt: {
-          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
-        }
-      },
-      orderBy: { createdAt: "desc" }
+    // Increment view count
+    await db.startup.update({
+      where: { id: startupId },
+      data: {
+        viewCount: { increment: 1 }
+      }
     });
 
-    return NextResponse.json({
-      ...startup,
-      analytics
+    // Track analytics event
+    await db.analyticsEvent.create({
+      data: {
+        type: "view",
+        startupId: startupId,
+        metadata: {
+          timestamp: new Date(),
+          userAgent: req.headers.get("user-agent")
+        }
+      }
     });
+
+    return NextResponse.json(startup);
   } catch (error) {
     console.error("Error fetching startup:", error);
     return NextResponse.json(
