@@ -68,6 +68,7 @@ model Startup {
   jobs           Job[]
   blogPosts      BlogPost[]
   documents      Document[]
+  climateImpacts ClimateImpact[]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
@@ -232,4 +233,34 @@ model AnalyticsEvent {
   userId    String?  // Anonymous events won't have a user ID
   metadata  Json?    // Additional event data
   createdAt DateTime @default(now())
+}
+
+model ClimateImpact {
+  id          String   @id @default(cuid())
+  isActive    Boolean  @default(true)
+  
+  co2Reduction        Float?
+  waterSaved          Float?
+  energyEfficiency    Float?
+  wasteDiverted       Float?
+  biodiversityImpact  String?  @db.Text
+
+  carbonCaptured        Float?
+  lifecycleCo2Reduction Float?
+  offsetPrograms        String? @db.Text
+
+  sdgs            Int[]
+  sdgImpact       String?  @db.Text
+  certifications  String[]
+  awards          String?  @db.Text
+
+  lifecycle Json?
+
+  startupId String
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startupId])
 }

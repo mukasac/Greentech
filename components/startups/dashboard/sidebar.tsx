@@ -34,42 +34,37 @@ export function DashboardSidebar() {
       icon: Building2,
       permission: "STARTUP_VIEW",
     },
-    {
-      title: "Team",
-      href: "/startups/dashboard/team",
-      icon: Users,
-      permission: "VIEW_TEAM_MEMBERS",
-    },
-    {
-      title: "Jobs",
-      href: "/startups/dashboard/jobs",
-      icon: Briefcase,
-      permission: "VIEW_JOBS",
-    },
+    //{
+      //title: "Team",
+      //href: "/startups/dashboard/team",
+      //icon: Users,
+      //permission: "VIEW_TEAM_MEMBERS",
+    //},
+    //{
+      //title: "Jobs",
+      //href: "/startups/dashboard/jobs",
+      //icon: Briefcase,
+      //permission: "VIEW_JOBS",
+    //},
     {
       title: "Gallery",
       href: "/startups/dashboard/gallery",
       icon: Image,
       permission: "VIEW_GALLERY",
     },
-    {
-      title: "Blog",
-      href: "/startups/dashboard/blog",
-      icon: PenLine,
-      permission: "VIEW_BLOG",
-    },
+    //{
+      //title: "Blog",
+      //href: "/startups/dashboard/blog",
+      //icon: PenLine,
+      //permission: "VIEW_BLOG",
+    //},
     {
       title: "Analytics",
       href: "/startups/dashboard/analytics",
       icon: BarChart,
       permission: "STARTUP_VIEW",
     },
-    {
-      title: "Documents",
-      href: "/startups/dashboard/documents",
-      icon: FileText,
-      permission: "STARTUP_VIEW",
-    },
+   
     {
       title: "Settings",
       href: "/startups/dashboard/settings",

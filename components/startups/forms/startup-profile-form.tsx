@@ -13,7 +13,7 @@ import { AlertCircle, CheckCircle } from "lucide-react";
 import { CategorySelector } from "./category-selector";
 import { TeamForm } from "./team-form";
 import { GalleryUpload } from "./gallery-upload";
-import { SustainabilityForm } from "./sustainability-form";
+import { SustainabilityForm } from "./climate-impact-form";
 import { usePermissions } from "@/hooks/usePermissions";
 import { hasPermission } from "../../../lib/auth/utils";
 

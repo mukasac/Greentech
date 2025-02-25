@@ -237,6 +237,8 @@ async function main() {
     "VIEW_USERS",
     "ADD_ROLES",
     "ASSIGN_ROLES",
+    "MANAGE_CLIMATE_IMPACT",
+    "VIEW_CLIMATE_IMPACT",
   ];
 
   // Create permissions using the unique names

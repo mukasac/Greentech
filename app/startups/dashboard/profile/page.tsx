@@ -15,10 +15,10 @@ import { JobsDashboard } from "@/components/jobs/jobs-dashboard";
 import { BlogsDashboard } from "@/components/blog/blogs-dashboard";
 import { GallerySection } from "@/components/startups/sections/GallerySection";
 import { AnalyticsSection } from "@/components/startups/sections/AnalyticsSection";
-
+import { ClimateImpactSection } from "@/components/startups/sections/ClimateImpactSection";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Loader2, Settings2 } from "lucide-react";
+import { Loader2, Settings2, ShieldAlert, BarChart } from "lucide-react";
 import Link from "next/link";
 import { usePermissions } from "@/hooks/usePermissions";
 
@@ -81,50 +81,73 @@ export default function StartupProfilePage() {
           </Button>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-7">
-              
+          <Tabs defaultValue="climate" className="w-full">
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="climate">Climate Impact</TabsTrigger>
               <TabsTrigger value="team">Team</TabsTrigger>
               <TabsTrigger value="jobs">Jobs</TabsTrigger>
               <TabsTrigger value="blog">Blog</TabsTrigger>
               <TabsTrigger value="gallery">Gallery</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              
             </TabsList>
 
-            
+            <div className="mt-6">
+              <TabsContent value="climate">
+                {hasPermission("ADMIN_ACCESS") || hasPermission("STARTUP_VIEW") ? (
+                  <ClimateImpactSection startup={startup} />
+                ) : (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                      <ShieldAlert className="h-12 w-12 text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-medium mb-2">Access Required</h3>
+                      <p className="text-sm text-muted-foreground">
+                        You do not have permission to view climate impact data.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
 
-            <TabsContent value="team">
-              {hasPermission("VIEW_TEAM_MEMBERS") && (
-                <TeamSection startup={startup} />
-              )}
-            </TabsContent>
+              <TabsContent value="team">
+                {hasPermission("VIEW_TEAM_MEMBERS") && (
+                  <TeamSection startup={startup} />
+                )}
+              </TabsContent>
 
-            <TabsContent value="jobs">
-              {hasPermission("VIEW_JOBS") && (
-                <JobsDashboard />
-              )}
-            </TabsContent>
+              <TabsContent value="jobs">
+                {hasPermission("VIEW_JOBS") && (
+                  <JobsDashboard />
+                )}
+              </TabsContent>
 
-            <TabsContent value="blog">
-              {hasPermission("VIEW_BLOG") && (
-                <BlogsDashboard />
-              )}
-            </TabsContent>
+              <TabsContent value="blog">
+                {hasPermission("VIEW_BLOG") && (
+                  <BlogsDashboard />
+                )}
+              </TabsContent>
 
-            <TabsContent value="gallery">
-              {hasPermission("VIEW_GALLERY") && (
-                <GallerySection startup={startup} />
-              )}
-            </TabsContent>
+              <TabsContent value="gallery">
+                {hasPermission("VIEW_GALLERY") && (
+                  <GallerySection startup={startup} />
+                )}
+              </TabsContent>
 
-            <TabsContent value="analytics">
-              {hasPermission("VIEW_ANALYTICS") && (
-                <AnalyticsSection startup={startup} />
-              )}
-            </TabsContent>
-
-           
+              <TabsContent value="analytics">
+  {(hasPermission("ADMIN_ACCESS") || hasPermission("VIEW_STARTUP_DASHBOARD")) ? (
+    <AnalyticsSection startup={startup} />
+  ) : (
+    <Card>
+      <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+        <BarChart className="h-12 w-12 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-medium mb-2">Access Required</h3>
+        <p className="text-sm text-muted-foreground">
+          You dont have permission to view analytics data.
+        </p>
+      </CardContent>
+    </Card>
+  )}
+</TabsContent>
+            </div>
           </Tabs>
         </CardContent>
       </Card>

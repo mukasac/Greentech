@@ -1,3 +1,5 @@
+// lib/types/startup.ts
+
 // Base interfaces
 export interface TeamMember {
   id: string;
@@ -111,6 +113,45 @@ export interface BlogComment {
   createdAt: Date;
 }
 
+// New Climate Impact interfaces
+export interface LifecycleImpact {
+  circularity?: number;
+  recycledMaterials?: number;
+  wasteReduction?: number;
+  supplyChainReduction?: number;
+  description?: string;
+}
+
+export interface ClimateImpact {
+  id: string;
+  isActive: boolean;
+  
+  // Impact Metrics
+  co2Reduction?: number;
+  waterSaved?: number;
+  energyEfficiency?: number;
+  wasteDiverted?: number;
+  biodiversityImpact?: string;
+
+  // Carbon Footprint
+  carbonCaptured?: number;
+  lifecycleCo2Reduction?: number;
+  offsetPrograms?: string;
+
+  // SDGs and Certifications
+  sdgs: number[];
+  sdgImpact?: string;
+  certifications: string[];
+  awards?: string;
+
+  // Lifecycle Impact
+  lifecycle?: LifecycleImpact;
+
+  startupId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Main Startup interface
 export interface Startup {
   id: string;
@@ -139,6 +180,7 @@ export interface Startup {
   jobs: Job[];
   blogPosts: BlogPost[];
   documents: Document[];
+  climateImpacts: ClimateImpact[]; // New field
   createdAt: Date;
   updatedAt: Date;
 }

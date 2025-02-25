@@ -1,146 +1,195 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-    LineChart, 
-    Line, 
-    XAxis, 
-    YAxis, 
-    CartesianGrid, 
-    Tooltip, 
-    ResponsiveContainer,
-    PieChart,
-    Pie,
-    Cell
-  } from "recharts";
-  import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-  import { View, Users, MessageSquare, BarChart } from "lucide-react";
-  
-  interface AnalyticsSectionProps {
-    startup: any; // Replace with proper type
-  }
-  
-  const COLORS = [
-    'hsl(var(--chart-1))',
-    'hsl(var(--chart-2))',
-    'hsl(var(--chart-3))',
-    'hsl(var(--chart-4))',
-    'hsl(var(--chart-5))'
-  ];
-  
-  export function AnalyticsSection({ startup }: AnalyticsSectionProps) {
-    // Process analytics data
-    const stats = [
-      {
-        title: "Profile Views",
-        value: startup.analytics?.profileViews || 0,
-        icon: View,
-        change: "+12%"
-      },
-      {
-        title: "Job Applications",
-        value: startup.analytics?.jobApplications || 0,
-        icon: Users,
-        change: "+5%"
-      },
-      {
-        title: "Contact Inquiries",
-        value: startup.analytics?.inquiries || 0,
-        icon: MessageSquare,
-        change: "+8%"
-      },
-      {
-        title: "Total Interactions",
-        value: startup.analytics?.totalInteractions || 0,
-        icon: BarChart,
-        change: "+15%"
+  BarChart as RechartsBarChart,
+  Bar,
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  LineChart,
+  Line,
+} from "recharts";
+import { View, Briefcase, Users, Eye, LineChart as LineChartIcon } from "lucide-react";
+
+interface AnalyticsSectionProps {
+  startup: {
+    id: string;
+    name: string;
+    viewCount: number;
+    team?: { length: number };
+    jobs?: { length: number };
+  };
+}
+
+interface AnalyticsData {
+  viewsByDate: Record<string, number>;
+  totalViews: number;
+  jobStats: {
+    jobId: string;
+    title: string;
+    applicationCount: number;
+    viewCount: number;
+  }[];
+}
+
+export function AnalyticsSection({ startup }: AnalyticsSectionProps) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<AnalyticsData | null>(null);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const response = await fetch(`/api/startups/${startup.id}/analytics`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch analytics data");
+        }
+        const analyticsData = await response.json();
+        setData(analyticsData);
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
+        setError("Failed to load analytics data");
+      } finally {
+        setLoading(false);
       }
-    ];
-  
-    // Sample view data - replace with actual data processing
-    const viewData = startup.analytics?.viewsByDate?.map((view: any) => ({
-      date: new Date(view.date).toLocaleDateString(),
-      views: view.count
-    })) || [];
-  
+    };
+
+    fetchAnalytics();
+  }, [startup.id]);
+
+  if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={stat.title}>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    {stat.title}
-                  </CardTitle>
-                  <Icon className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stat.change} from last month
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-  
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Views Over Time</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={viewData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line 
-                      type="monotone" 
-                      dataKey="views" 
-                      stroke="hsl(var(--primary))" 
-                      name="Views" 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-  
-          <Card>
-            <CardHeader>
-              <CardTitle>Traffic Sources</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={startup.analytics?.trafficSources || []}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      paddingAngle={5}
-                      dataKey="value"
-                      label={({ name, percent }) => 
-                        `${name} ${(percent * 100).toFixed(0)}%`
-                      }
-                    >
-                      {(startup.analytics?.trafficSources || []).map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="flex items-center justify-center min-h-[200px]">
+        <p>Loading analytics...</p>
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <p className="text-destructive">{error}</p>
+      </div>
+    );
+  }
+
+  const viewsData = data ? Object.entries(data.viewsByDate).map(([date, count]) => ({
+    date,
+    views: count
+  })) : [];
+
+  const jobData = data?.jobStats.map(job => ({
+    title: job.title,
+    applications: job.applicationCount,
+    views: job.viewCount
+  })) || [];
+
+  return (
+    <div className="space-y-6">
+      {/* Quick Stats */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Views</p>
+                <h3 className="text-2xl font-bold">{data?.totalViews || 0}</h3>
+              </div>
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Team Members</p>
+                <h3 className="text-2xl font-bold">{startup.team?.length || 0}</h3>
+              </div>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Active Jobs</p>
+                <h3 className="text-2xl font-bold">{startup.jobs?.length || 0}</h3>
+              </div>
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Applications</p>
+                <h3 className="text-2xl font-bold">
+                  {data?.jobStats.reduce((sum, job) => sum + job.applicationCount, 0) || 0}
+                </h3>
+              </div>
+              <LineChartIcon className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Profile Views Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile Views</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={viewsData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="views"
+                  stroke="hsl(var(--primary))"
+                  name="Views"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Job Performance Chart */}
+      {jobData.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Job Performance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsBarChart data={jobData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="title" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="views" fill="hsl(var(--primary))" name="Views" />
+                  <Bar dataKey="applications" fill="hsl(var(--primary))" name="Applications" />
+                </RechartsBarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

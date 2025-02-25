@@ -12,15 +12,28 @@ export interface BlogPost {
     avatar: string;
   };
   tags: string[];
-  publishedAt: string;
-  updatedAt?: string;
-  status: 'draft' | 'published';
+  publishedAt: Date | null;
+  updatedAt: Date | null;
+  status: 'draft' | 'published' | 'archived';
   readTime: number;
+  viewCount: number;
+  comments: BlogComment[];
 }
 
-export interface BlogCategory {
+export interface BlogComment {
   id: string;
+  blogId: string;
   name: string;
-  slug: string;
-  description?: string;
+  email: string;
+  content: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: Date;
+}
+
+export interface BlogFormData {
+  title: string;
+  content: string;
+  excerpt: string;
+  coverImage: string;
+  tags: string[];
 }

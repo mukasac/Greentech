@@ -15,8 +15,8 @@ import { JobType, ExperienceLevel, WorkLocation, Currency } from "@/lib/types/jo
 
 interface JobPostingFormProps {
   startupId: string;
-  action: string;
-  isSubmitting: boolean;
+  onSuccess: () => void;
+  onError: (message: string) => void;
 }
 
 interface FormState {
@@ -65,9 +65,10 @@ interface JobApiRequest {
 
 const JobPostingForm: React.FC<JobPostingFormProps> = ({ 
   startupId,
-  action,
-  isSubmitting
+  onSuccess,
+  onError
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<FormState>({
@@ -89,13 +90,48 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     setErrorMessage(null);
 
-    // Dispatch custom event with form data
-    const event = new CustomEvent('jobFormSubmit', {
-      detail: formData
-    });
-    window.dispatchEvent(event);
+    try {
+      const response = await fetch('/api/jobs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          startup: {
+            id: startupId
+          },
+          requirements: formData.requirements.split('\n').filter(Boolean),
+          responsibilities: formData.responsibilities.split('\n').filter(Boolean),
+          skills: formData.skills.split(',').map(skill => skill.trim()).filter(Boolean),
+          salary: {
+            min: parseInt(formData.salaryMin),
+            max: parseInt(formData.salaryMax),
+            currency: formData.currency
+          },
+          location: {
+            type: formData.locationType,
+            city: formData.city || null,
+            country: formData.country
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create job posting');
+      }
+
+      onSuccess();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'An error occurred while creating the job posting';
+      setErrorMessage(message);
+      onError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (field: keyof FormState, value: string) => {

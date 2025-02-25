@@ -10,7 +10,7 @@ export default function StartupBlogDashboardPage() {
         <div>
           <h1 className="text-3xl font-bold">Blog Posts</h1>
           <p className="text-muted-foreground">
-            Share your startup's journey and updates
+            Share your startup journey and updates
           </p>
         </div>
         <Button asChild>

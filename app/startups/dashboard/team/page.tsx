@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -60,7 +61,7 @@ export default function TeamDashboardPage() {
   }
 
   const currentStartup = startups.find(s => s.id === selectedStartup);
-  const teamMembers = (currentStartup?.team?.leadership || []) as TeamMember[];
+  const teamMembers = currentStartup?.team || [];
 
   return (
     <div className="container py-8">

@@ -1,4 +1,3 @@
-// app/startups/dashboard/blog/create/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,6 +6,15 @@ import { useSession } from "next-auth/react";
 import { BlogEditor } from "@/components/blog/blog-editor";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { BlogFormData, BlogPost } from "@/lib/types/blog";
+
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+}
 
 export default function CreateBlogPostPage() {
   const router = useRouter();
@@ -38,7 +46,7 @@ export default function CreateBlogPostPage() {
     }
   }, [session]);
 
-  const handleSave = async (data: any, status: 'draft' | 'published') => {
+  const handleSave = async (formData: BlogFormData, status: BlogPost['status']) => {
     if (!startupId) {
       setError('No startup selected');
       return;
@@ -48,16 +56,28 @@ export default function CreateBlogPostPage() {
     setError(null);
 
     try {
+      const blogPostData = {
+        ...formData,
+        slug: generateSlug(formData.title),
+        status,
+        startupId,
+        author: {
+          name: session?.user?.name || 'Anonymous',
+          role: 'Startup Member',
+          avatar: '/default-avatar.png' // Use default avatar since session user doesn't have image
+        },
+        publishedAt: status === 'published' ? new Date().toISOString() : null,
+        updatedAt: new Date().toISOString(),
+        readTime: Math.ceil(formData.content.split(/\s+/).length / 200),
+        viewCount: 0
+      };
+
       const response = await fetch('/api/blogs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...data,
-          status,
-          startupId,
-        }),
+        body: JSON.stringify(blogPostData),
       });
 
       if (!response.ok) {
@@ -76,6 +96,18 @@ export default function CreateBlogPostPage() {
 
   if (loading) {
     return <div>Loading...</div>;
+  }
+
+  if (!session) {
+    return (
+      <Alert variant="destructive" className="m-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Authentication Required</AlertTitle>
+        <AlertDescription>
+          You must be signed in to create a blog post.
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   return (

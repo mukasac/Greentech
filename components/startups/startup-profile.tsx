@@ -9,16 +9,18 @@ import { Calendar, Globe, Users, Building2, Banknote } from "lucide-react";
 import { StartupProfileHeader } from "./startup-profile-header";
 import { usePermissions } from "@/hooks/usePermissions";
 import Link from "next/link";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Image from "next/image";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { GalleryImage } from "@/lib/types/startup";
+import { ClimateImpactDisplay } from "./profile/climate-impact-display";
 
 interface StartupProfileProps {
   startup: Startup;
 }
 
 export function StartupProfile({ startup }: StartupProfileProps) {
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const { hasPermission } = usePermissions();
-  const [selectedImage, setSelectedImage] = useState<any>(null);
 
   // Helper function to format location
   const formatLocation = (location: { type: string; city?: string; country: string }) => {
@@ -63,6 +65,20 @@ export function StartupProfile({ startup }: StartupProfileProps) {
                     Funding: {startup.funding}
                   </div>
                 </div>
+              </section>
+
+              {/* Climate Impact Section */}
+              <section>
+                <h2 className="mb-4 text-2xl font-semibold">Climate Impact</h2>
+                {startup.climateImpacts && startup.climateImpacts.length > 0 ? (
+                  <ClimateImpactDisplay climateImpacts={startup.climateImpacts} />
+                ) : (
+                  <Card>
+                    <CardContent className="p-6 text-center">
+                      <p className="text-muted-foreground">No climate impact data available.</p>
+                    </CardContent>
+                  </Card>
+                )}
               </section>
 
               {/* Team Section */}
@@ -138,18 +154,6 @@ export function StartupProfile({ startup }: StartupProfileProps) {
                   </div>
                 </section>
               )}
-
-              {/* Technology Section */}
-              <section>
-                <h2 className="mb-4 text-2xl font-semibold">Technology & Focus Areas</h2>
-                <div className="flex flex-wrap gap-2">
-                  {startup.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </section>
 
               {/* Jobs Section */}
               {startup.jobs && startup.jobs.length > 0 && hasPermission("VIEW_JOBS") && (

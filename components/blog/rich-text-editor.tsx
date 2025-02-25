@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Editor } from '@tiptap/core';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -14,23 +14,12 @@ import {
 } from 'lucide-react';
 
 interface RichTextEditorProps {
-  content: string;
-  onChange: (content: string) => void;
+  initialContent: string;
+  onUpdate: (content: string) => void;
 }
 
-// This serializes the onChange prop to prevent "Props must be serializable" error
-function createSerializableEditor({ content, onChange }: RichTextEditorProps) {
-  const [value, setValue] = useState(content);
-  
-  useEffect(() => {
-    onChange(value);
-  }, [value, onChange]);
-
-  return { value, setValue };
-}
-
-export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
-  const { value, setValue } = createSerializableEditor({ content, onChange });
+export function RichTextEditor({ initialContent, onUpdate }: RichTextEditorProps) {
+  const [content, setContent] = useState(initialContent);
   
   const editor = useEditor({
     extensions: [
@@ -40,9 +29,11 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
         openOnClick: false,
       }),
     ],
-    content: value,
+    content: content,
     onUpdate: ({ editor }: { editor: Editor }) => {
-      setValue(editor.getHTML());
+      const newContent = editor.getHTML();
+      setContent(newContent);
+      onUpdate(newContent);
     },
   });
 

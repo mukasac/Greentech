@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { BlogPost } from "@/lib/types/blog";
+import { BlogFormData } from "@/lib/types/blog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,11 +10,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Camera, Save, FileImage, AlertCircle } from "lucide-react";
+import Image from "next/image";
 
 interface BlogEditorProps {
-  onSave: (data: Partial<BlogPost>, status: 'draft' | 'published') => void;
+  onSave: (data: BlogFormData, status: 'draft' | 'published') => Promise<void>;
   isSubmitting: boolean;
-  initialData?: Partial<BlogPost>;
+  initialData?: Partial<BlogFormData>;
 }
 
 export function BlogEditor({ 
@@ -22,13 +23,12 @@ export function BlogEditor({
   isSubmitting,
   initialData = {}
 }: BlogEditorProps) {
-  const [formData, setFormData] = useState<Partial<BlogPost>>({
+  const [formData, setFormData] = useState<BlogFormData>({
     title: initialData.title || '',
     content: initialData.content || '',
     excerpt: initialData.excerpt || '',
     coverImage: initialData.coverImage || '',
     tags: initialData.tags || [],
-    ...initialData
   });
   
   const [activeTab, setActiveTab] = useState<string>("write");
@@ -37,8 +37,8 @@ export function BlogEditor({
   const [imageUploading, setImageUploading] = useState(false);
 
   const handleChange = (
-    field: keyof BlogPost,
-    value: any
+    field: keyof BlogFormData,
+    value: string | string[]
   ) => {
     setFormData(prev => ({
       ...prev,
@@ -47,33 +47,25 @@ export function BlogEditor({
   };
 
   const handleAddTag = () => {
-    if (tagInput.trim() && !formData.tags?.includes(tagInput.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...(prev.tags || []), tagInput.trim()]
-      }));
+    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
+      handleChange('tags', [...formData.tags, tagInput.trim()]);
       setTagInput('');
     }
   };
 
   const handleRemoveTag = (tag: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags?.filter(t => t !== tag) || []
-    }));
+    handleChange('tags', formData.tags.filter(t => t !== tag));
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       setError('Please upload an image file');
       return;
     }
 
-    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       setError('Image must be less than 5MB');
       return;
@@ -114,24 +106,22 @@ export function BlogEditor({
       const excerpt = plainText.slice(0, 150) + (plainText.length > 150 ? '...' : '');
       handleChange('excerpt', excerpt);
     }
-  }, [formData.content]);
+  }, [formData.content, formData.excerpt]);
 
   const handleSave = async (status: 'draft' | 'published') => {
     try {
       setError(null);
       
-      // Validate required fields
-      if (!formData.title?.trim()) {
+      if (!formData.title.trim()) {
         throw new Error('Title is required');
       }
-      if (!formData.content?.trim()) {
+      if (!formData.content.trim()) {
         throw new Error('Content is required');
       }
       if (!formData.coverImage) {
         throw new Error('Cover image is required');
       }
 
-      // Generate excerpt if not provided
       if (!formData.excerpt) {
         generateExcerpt();
       }
@@ -175,10 +165,11 @@ export function BlogEditor({
           <div className="mb-4 flex items-center gap-4">
             <div className="relative aspect-video w-40 overflow-hidden rounded border bg-muted">
               {formData.coverImage ? (
-                <img
+                <Image
                   src={formData.coverImage}
                   alt="Cover preview"
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center">
@@ -221,7 +212,7 @@ export function BlogEditor({
             Tags
           </Label>
           <div className="flex flex-wrap gap-2 mb-2">
-            {formData.tags?.map((tag) => (
+            {formData.tags.map((tag) => (
               <div key={tag} className="flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-sm">
                 {tag}
                 <button

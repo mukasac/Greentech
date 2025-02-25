@@ -48,7 +48,8 @@ export async function GET(
         documents: {
           where: { shared: true },
           orderBy: { createdAt: 'desc' }
-        }
+        },
+        climateImpacts: true
       }
     });
 

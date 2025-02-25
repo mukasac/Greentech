@@ -18,6 +18,7 @@ export async function GET() {
       include: {
         team: true,
         gallery: true,
+        climateImpacts: true 
       }
     });
 
