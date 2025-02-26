@@ -1,4 +1,6 @@
 import { PrismaClient } from "@prisma/client";
+import seedCategoriesAndStartups from "./seedCategoriesAndStartups";
+
 const prisma = new PrismaClient();
 
 async function clearDatabase() {
@@ -23,166 +25,6 @@ async function main() {
 
   // Clear existing data
   await clearDatabase();
-
-  // Create the permissions
-  // const permissions = await Promise.all([
-  //   prisma.permission.create({
-  //     data: { name: "STARTUP_CREATE" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "STARTUP_EDIT" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "STARTUP_DELETE" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "STARTUP_VIEW" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "ADMIN_ACCESS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "DASHBOARD_ACCESS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_REGIONS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "CREATE_REGIONS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "UPDATE_REGIONS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "DELETE_REGIONS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "UPDATE_JOBS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "DELETE_JOBS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "CREATE_EVENTS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_EVENTS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "UPDATE_EVENTS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "DELETE_EVENTS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_LATEST_NEWS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "CREATE_LATEST_NEWS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "UPDATE_LATEST_NEWS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "DELETE_LATEST_NEWS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "CREATE_JOBS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_JOBS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "APPLY_JOBS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "UPDATE_JOBS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "DELETE_JOBS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_STARTUP_PROFILE" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "CLAIM_STARTUP" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_TEAM_MEMBERS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "CREATE_TEAM_MEMBERS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "DELETE_TEAM_MEMBERS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "UPDATE_TEAM_MEMBERS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_GALLERY" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "CREATE_GALLERY" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "DELETE_GALLERY" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "UPDATE_GALLERY" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "CREATE_BLOG" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_BLOG" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "DELETE_BLOG" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "UPDATE_BLOG" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_DEPARTMENTS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "CREATE_DEPARTMENTS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "UPDATE_DEPARTMENTS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "DELETE_DEPARTMENTS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "CREATE_STARTUP_CATEGORY" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_STARTUP_CATEGORY" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "UPDATE_STARTUP_CATEGORY" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "DELETE_STARTUP_CATEGORY" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_STARTUP_DASHBOARD" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_ROLES_AND_PERMISIONS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "VIEW_USERS" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "ADD_ROLES" },
-  //   }),
-  //   prisma.permission.create({
-  //     data: { name: "ASSIGN_ROLES" },
-  //   }),
-  // ]);
 
   // Create the permissions - removed duplicates
   const permissionNames = [
@@ -307,6 +149,8 @@ async function main() {
     }),
   ]);
 
+    //seed categories and start ups
+    seedCategoriesAndStartups();
   // Log completion
   console.log("Seeding completed successfully");
 }

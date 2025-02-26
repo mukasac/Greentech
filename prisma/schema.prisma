@@ -43,14 +43,19 @@ model RolePermission {
   @@id([roleId, permissionId])
 }
 
+model Category {
+  id          Int               @id @default(autoincrement())
+  name        String            @unique
+  description String?
+  startups    StartupCategory[]
+}
+
 model Startup {
   id             String    @id @default(cuid())
   name           String
   description    String
   logo           String    @default("/placeholder-logo.png")
   profileImage   String    @default("/placeholder-profile.jpg")
-  mainCategory   String    @default("renewable-energy")
-  subcategories  String[]  @default([])
   country        String    @default("norway")
   founded        Int
   website        String
@@ -69,6 +74,7 @@ model Startup {
   blogPosts      BlogPost[]
   documents      Document[]
   climateImpacts ClimateImpact[]
+  categories   StartupCategory[]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
@@ -263,4 +269,13 @@ model ClimateImpact {
   updatedAt DateTime @updatedAt
 
   @@index([startupId])
+}
+
+model StartupCategory {
+  startup    Startup  @relation(fields: [startupId], references: [id])
+  startupId  String
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+  @@id([startupId, categoryId])
 }
