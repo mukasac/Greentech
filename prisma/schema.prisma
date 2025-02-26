@@ -66,8 +66,8 @@ model Startup {
   featured       Boolean   @default(false)
   sustainability Json?     // Store sustainability data as JSON
   viewCount      Int       @default(0)        // Track profile views
-  userId         String
-  user           User      @relation(fields: [userId], references: [id])
+  userId         String?
+  user           User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
   team           Team[]
   gallery        Gallery[]
   jobs           Job[]
