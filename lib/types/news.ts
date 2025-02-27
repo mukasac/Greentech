@@ -1,3 +1,4 @@
+// lib/types/news.ts
 export interface NewsItem {
   id: string;
   title: string;
@@ -6,7 +7,9 @@ export interface NewsItem {
   content: string;
   image: string;
   tags: string[];
-  publishedAt: string;
   region: string;
   source?: string;
+  authorId?: string;
+  publishedAt: string;
+  updatedAt: string;
 }

@@ -1,42 +1,64 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Event } from "@/lib/types/event";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Users } from "lucide-react";
+import { Calendar, MapPin, Users, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { usePermissions } from "@/hooks/usePermissions";
 
-// Mock data - replace with actual data fetching
-const events: Event[] = [
-  {
-    id: "1",
-    title: "Nordic Green Tech Summit 2024",
-    slug: "nordic-green-tech-summit-2024",
-    description:
-      "Annual conference bringing together leading sustainable technology innovators.",
-    type: "conference",
-    date: "2024-06-15T09:00:00Z",
-    location: "Oslo, Norway",
-    attendees: 250,
-    maxAttendees: 500,
-    price: {
-      amount: 299,
-      currency: "EUR",
-    },
-    organizer: {
-      name: "Innovation Norway",
-      logo: "https://example.com/logo.png",
-    },
-    region: "norway",
-    tags: ["Conference", "Networking", "Innovation"],
-  },
-  // Add more events...
-];
-
 export function EventsList() {
   const { hasPermission } = usePermissions();
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/events", {
+          cache: 'no-store',
+          headers: {
+            'pragma': 'no-cache',
+            'cache-control': 'no-cache'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch events");
+        }
+        
+        const data = await response.json();
+        setEvents(data);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        setError("Failed to load events");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-4">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-center py-4 text-red-500">{error}</div>;
+  }
+
+  if (!events || events.length === 0) {
+    return <div className="text-center py-4">No events found</div>;
+  }
 
   return (
     <div className="grid gap-6">
@@ -47,7 +69,7 @@ export function EventsList() {
               <div>
                 <div className="mb-2 flex items-center gap-2">
                   <Badge>{event.type}</Badge>
-                  {event.tags.map((tag) => (
+                  {event.tags.slice(0, 2).map((tag) => (
                     <Badge key={tag} variant="secondary">
                       {tag}
                     </Badge>
@@ -55,7 +77,8 @@ export function EventsList() {
                 </div>
                 <h3 className="text-xl font-semibold">{event.title}</h3>
                 <p className="mt-1 text-muted-foreground">
-                  {event.description}
+                  {event.description.substring(0, 120)}
+                  {event.description.length > 120 ? '...' : ''}
                 </p>
               </div>
 
@@ -71,9 +94,13 @@ export function EventsList() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
-                    <span>
-                      {event.attendees} / {event.maxAttendees} attendees
-                    </span>
+                    {event.maxAttendees ? (
+                      <span>
+                        {event.attendees} / {event.maxAttendees} attendees
+                      </span>
+                    ) : (
+                      <span>{event.attendees} attendees</span>
+                    )}
                   </div>
                 </div>
                 {hasPermission("REGISTER_FOR_EVENT") && (

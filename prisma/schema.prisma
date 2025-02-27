@@ -1,4 +1,4 @@
-// prisma/schema.prisma
+// This is the complete updated schema with region models added
 
 generator client {
   provider = "prisma-client-js"
@@ -30,7 +30,7 @@ model Role {
 
 model Permission {
   id    Int             @id @default(autoincrement())
-  name  String          @unique // Add CREATE_BLOG_POST, MANAGE_GALLERY to this
+  name  String          @unique
   roles RolePermission[]
 }
 
@@ -44,33 +44,37 @@ model RolePermission {
 }
 
 model Startup {
-  id             String    @id @default(cuid())
+  id             String          @id @default(cuid())
   name           String
   description    String
-  logo           String    @default("/placeholder-logo.png")
-  profileImage   String    @default("/placeholder-profile.jpg")
-  mainCategory   String    @default("renewable-energy")
-  subcategories  String[]  @default([])
-  country        String    @default("norway")
+  logo           String          @default("/placeholder-logo.png")
+  profileImage   String          @default("/placeholder-profile.jpg")
+  mainCategory   String          @default("renewable-energy")
+  subcategories  String[]        @default([])
+  country        String          @default("norway")
   founded        Int
   website        String
   funding        String
   employees      String
-  tags           String[]  @default([])
-  status         String    @default("active") // active, pending, archived
-  featured       Boolean   @default(false)
-  sustainability Json?     // Store sustainability data as JSON
-  viewCount      Int       @default(0)        // Track profile views
+  tags           String[]        @default([])
+  status         String          @default("active") // active, pending, archived
+  featured       Boolean         @default(false)
+  sustainability Json?           // Store sustainability data as JSON
+  viewCount      Int             @default(0)
   userId         String
-  user           User      @relation(fields: [userId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
   team           Team[]
   gallery        Gallery[]
   jobs           Job[]
   blogPosts      BlogPost[]
   documents      Document[]
   climateImpacts ClimateImpact[]
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  regionId       String?
+  region         Region?         @relation(fields: [regionId], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([regionId])
 }
 
 model Team {
@@ -113,59 +117,59 @@ model Document {
 }
 
 model Job {
-  id               String   @id @default(cuid())
+  id               String           @id @default(cuid())
   title            String
-  type             String   // full-time, part-time, contract, internship
-  experienceLevel  String   // entry, mid, senior, lead, executive
-  location         Json     // {type: remote/hybrid/on-site, city?: string, country: string}
-  salary           Json     // {min: number, max: number, currency: string}
-  description      String   @db.Text
-  requirements     String[] // Array of requirement strings 
-  responsibilities String[] // Array of responsibility strings
-  skills           String[] // Array of required skills
+  type             String           // full-time, part-time, contract, internship
+  experienceLevel  String           // entry, mid, senior, lead, executive
+  location         Json             // {type: remote/hybrid/on-site, city?: string, country: string}
+  salary           Json             // {min: number, max: number, currency: string}
+  description      String           @db.Text
+  requirements     String[]         // Array of requirement strings 
+  responsibilities String[]         // Array of responsibility strings
+  skills           String[]         // Array of required skills
   department       String
   applicationUrl   String
-  status           String   @default("active") // active, filled, expired
-  applicationCount Int      @default(0)
-  viewCount        Int      @default(0)
+  status           String           @default("active") // active, filled, expired
+  applicationCount Int              @default(0)
+  viewCount        Int              @default(0)
   startupId        String
-  startup          Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  startup          Startup          @relation(fields: [startupId], references: [id], onDelete: Cascade)
   applications     JobApplication[]
-  postedAt         DateTime @default(now())
+  postedAt         DateTime         @default(now())
   expiresAt        DateTime?
-  updatedAt        DateTime @updatedAt
+  updatedAt        DateTime         @updatedAt
 }
 
 model JobApplication {
-  id           String   @id @default(cuid())
-  jobId        String
-  job          Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  jobId         String
+  job           Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
   candidateName String
-  email        String
-  resumeUrl    String
-  coverLetter  String?  @db.Text
-  status       String   @default("new") // new, reviewing, interview, offer, rejected
-  notes        String?  @db.Text
-  appliedAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  email         String
+  resumeUrl     String
+  coverLetter   String?  @db.Text
+  status        String   @default("new") // new, reviewing, interview, offer, rejected
+  notes         String?  @db.Text
+  appliedAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model BlogPost {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   title       String
   slug        String
-  content     String   @db.Text
+  content     String        @db.Text
   excerpt     String
   coverImage  String
-  author      Json     // {name: string, role: string, avatar: string}
+  author      Json          // {name: string, role: string, avatar: string}
   tags        String[]
-  publishedAt DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  status      String   @default("draft") // draft, published, archived
-  readTime    Int      @default(5)       // Estimated read time in minutes
-  viewCount   Int      @default(0)
+  publishedAt DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  status      String        @default("draft") // draft, published, archived
+  readTime    Int           @default(5)       // Estimated read time in minutes
+  viewCount   Int           @default(0)
   startupId   String
-  startup     Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  startup     Startup       @relation(fields: [startupId], references: [id], onDelete: Cascade)
   comments    BlogComment[]
 }
 
@@ -181,33 +185,37 @@ model BlogComment {
 }
 
 model Event {
-  id           String        @id @default(cuid())
-  title        String
-  slug         String        @unique
-  description  String        @db.Text
-  type         String
-  date         DateTime
-  location     String
-  attendees    Int           @default(0)
-  maxAttendees Int?
-  price        Json?         // {amount: number, currency: string}
-  organizer    Json         // {name: string, logo?: string}
-  region       String
-  tags         String[]
+  id            String             @id @default(cuid())
+  title         String
+  slug          String             @unique
+  description   String             @db.Text
+  type          String
+  date          DateTime
+  location      String
+  attendees     Int                @default(0)
+  maxAttendees  Int?
+  price         Json?              // {amount: number, currency: string}
+  organizer     Json               // {name: string, logo?: string}
+  region        String
+  regionId      String?
+  regionEntity  Region?            @relation(fields: [regionId], references: [id])
+  tags          String[]
   registrations EventRegistration[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([regionId])
 }
 
 model EventRegistration {
-  id          String   @id @default(cuid())
-  eventId     String
-  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  name        String
-  email       String
-  company     String?
+  id           String   @id @default(cuid())
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name         String
+  email        String
+  company      String?
   registeredAt DateTime @default(now())
-  status      String   @default("confirmed") // confirmed, cancelled, attended
+  status       String   @default("confirmed") // confirmed, cancelled, attended
 }
 
 model News {
@@ -219,10 +227,14 @@ model News {
   image       String
   tags        String[]
   region      String
+  regionId    String?
+  regionEntity Region?  @relation(fields: [regionId], references: [id])
   source      String?
   authorId    String?
   publishedAt DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([regionId])
 }
 
 // Track startup metrics
@@ -236,31 +248,83 @@ model AnalyticsEvent {
 }
 
 model ClimateImpact {
-  id          String   @id @default(cuid())
-  isActive    Boolean  @default(true)
-  
-  co2Reduction        Float?
-  waterSaved          Float?
-  energyEfficiency    Float?
-  wasteDiverted       Float?
-  biodiversityImpact  String?  @db.Text
-
-  carbonCaptured        Float?
+  id                String   @id @default(cuid())
+  isActive          Boolean  @default(true)
+  co2Reduction      Float?
+  waterSaved        Float?
+  energyEfficiency  Float?
+  wasteDiverted     Float?
+  biodiversityImpact String?  @db.Text
+  carbonCaptured    Float?
   lifecycleCo2Reduction Float?
-  offsetPrograms        String? @db.Text
+  offsetPrograms    String?  @db.Text
+  sdgs              Int[]
+  sdgImpact         String?  @db.Text
+  certifications    String[]
+  awards            String?  @db.Text
+  lifecycle         Json?
+  startupId         String
+  startup           Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  sdgs            Int[]
-  sdgImpact       String?  @db.Text
-  certifications  String[]
-  awards          String?  @db.Text
+  @@index([startupId])
+}
 
-  lifecycle Json?
+// New Region Models
 
-  startupId String
-  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
-  
+model Region {
+  id                String              @id @default(cuid())
+  slug              String              @unique
+  name              String
+  description       String
+  coverImage        String
+  stats             RegionStats?
+  initiatives       RegionInitiative[]
+  ecosystemPartners EcosystemPartner[]
+  startups          Startup[]
+  news              News[]
+  events            Event[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([slug])
+}
+
+model RegionStats {
+  id              String   @id @default(cuid())
+  regionId        String   @unique
+  region          Region   @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  startups        Int      @default(0)
+  employees       Int      @default(0)
+  openJobs        Int      @default(0)
+  upcomingEvents  Int      @default(0)
+  totalInvestment String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model RegionInitiative {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  regionId    String
+  region      Region   @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([regionId])
+}
+
+model EcosystemPartner {
+  id        String   @id @default(cuid())
+  name      String
+  logo      String
+  type      String // accelerator, investor, university, government
+  regionId  String
+  region    Region   @relation(fields: [regionId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([startupId])
+  @@index([regionId])
 }

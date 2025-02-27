@@ -5,16 +5,24 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { getRegionNews } from "@/lib/data/news";
+import { NewsItem } from "@/lib/types/news";
 import { usePermissions } from "@/hooks/usePermissions";
 
 interface RegionNewsProps {
   region: string;
+  news: NewsItem[];
 }
 
-export function RegionNews({ region }: RegionNewsProps) {
-  const news = getRegionNews(region);
+export function RegionNews({ region, news }: RegionNewsProps) {
   const { hasPermission } = usePermissions();
+
+  if (!news || news.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No news available for this region.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -1,34 +1,26 @@
 import { notFound } from "next/navigation";
-import { regions } from "@/lib/data/regions";
-import { RegionEcosystemHeader } from "@/components/regions/ecosystem/region-ecosystem-header";
-import { RegionInitiatives } from "@/components/regions/ecosystem/region-initiatives";
-import { RegionPartners } from "@/components/regions/ecosystem/region-partners";
-import { RegionInvestments } from "@/components/regions/ecosystem/region-investments";
+import { EcosystemContent } from "@/components/regions/ecosystem/ecosystem-content";
+import { RegionService } from "@/lib/services/region-service";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const regions = await RegionService.getAllRegions();
   return regions.map((region) => ({
     region: region.slug,
   }));
 }
 
-export default function RegionEcosystemPage({ params }: { params: { region: string } }) {
-  const region = regions.find((r) => r.slug === params.region);
+export default async function RegionEcosystemPage({ params }: { params: { region: string } }) {
+  try {
+    // Get region data using the service
+    const region = await RegionService.getRegionBySlug(params.region);
+    
+    if (!region) {
+      notFound();
+    }
 
-  if (!region) {
+    return <EcosystemContent region={region} />;
+  } catch (error) {
+    console.error(`Error in RegionEcosystemPage for ${params.region}:`, error);
     notFound();
   }
-
-  return (
-    <div>
-      <RegionEcosystemHeader region={region} />
-      
-      <div className="container py-8">
-        <div className="grid gap-8">
-          <RegionInitiatives initiatives={region.initiatives} />
-          <RegionPartners partners={region.ecosystemPartners} />
-          <RegionInvestments region={region} />
-        </div>
-      </div>
-    </div>
-  );
 }

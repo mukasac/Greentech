@@ -1,6 +1,6 @@
 "use client";
 
-import { startups } from "@/lib/data/startups";
+import { Startup } from "@/lib/types/startup";
 import { StartupCard } from "@/components/startups/startup-card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -9,26 +9,24 @@ import { usePermissions } from "@/hooks/usePermissions";
 
 interface RegionStartupsProps {
   region: string;
+  startups: Startup[];
 }
 
-export function RegionStartups({ region }: RegionStartupsProps) {
-  const regionStartups = startups.filter(startup => 
-    startup.country.toLowerCase() === region
-  ).slice(0, 3); // Show only 3 featured startups
+export function RegionStartups({ region, startups }: RegionStartupsProps) {
+  const { hasPermission } = usePermissions();
 
-  if (!regionStartups.length) {
+  if (!startups || startups.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">No startups found in this region.</p>
       </div>
     );
   }
-  const { hasPermission } = usePermissions();
 
   return (
     <div className="space-y-6">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {regionStartups.map((startup) => (
+        {startups.map((startup) => (
           <StartupCard key={startup.id} startup={startup} />
         ))}
       </div>

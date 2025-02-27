@@ -136,17 +136,68 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
+    
+    // Extract filter parameters
     const startupId = searchParams.get("startupId");
     const type = searchParams.get("type");
     const experienceLevel = searchParams.get("experienceLevel");
-
-    const where = {
-      ...(startupId && { startupId }),
-      ...(type && { type }),
-      ...(experienceLevel && { experienceLevel }),
+    const location = searchParams.get("location");
+    const country = searchParams.get("country");
+    
+    // Build the where clause for the database query
+    const where: any = {
       status: "active", // Only return active jobs
     };
+    
+    // Add filters if they exist
+    if (startupId) {
+      where.startupId = startupId;
+    }
+    
+    if (type) {
+      where.type = type;
+    }
+    
+    if (experienceLevel) {
+      where.experienceLevel = experienceLevel;
+    }
+    
+    // Handle location and country filters
+    // Create a complex query to handle both the location type and country
+    if (location || country) {
+      // We need to structure this differently based on if we have one or both filters
+      if (location && country) {
+        // When we have both filters, we need a more complex structure
+        where.AND = [
+          {
+            location: {
+              path: ['type'],
+              equals: location
+            }
+          },
+          {
+            location: {
+              path: ['country'],
+              equals: country
+            }
+          }
+        ];
+      } else if (location) {
+        // Just location type filter
+        where.location = {
+          path: ['type'],
+          equals: location
+        };
+      } else if (country) {
+        // Just country filter
+        where.location = {
+          path: ['country'],
+          equals: country
+        };
+      }
+    }
 
+    // Query the database
     const jobs = await db.job.findMany({
       where,
       include: {
@@ -160,6 +211,82 @@ export async function GET(req: Request) {
       },
       orderBy: { postedAt: "desc" },
     });
+
+    // If there are no jobs found in the production environment, try to mock data
+    if (jobs.length === 0 && process.env.NODE_ENV !== 'production') {
+      console.log("No jobs found in database, returning mock data for development");
+      
+      // Return sample mock data for development
+      return NextResponse.json([
+        {
+          id: "mock-1",
+          title: "Senior Renewable Energy Engineer",
+          type: "full-time",
+          experienceLevel: "senior",
+          location: {
+            type: "hybrid",
+            city: "Oslo",
+            country: "Norway"
+          },
+          salary: {
+            min: 90000,
+            max: 120000,
+            currency: "EUR"
+          },
+          description: "Design and develop renewable energy solutions...",
+          requirements: ["5+ years experience in renewable energy", "Engineering degree", "Project management experience"],
+          responsibilities: ["Lead technical design of renewable energy systems", "Collaborate with cross-functional teams"],
+          skills: ["Solar PV", "Wind Energy", "Energy Storage", "Project Management"],
+          department: "Engineering",
+          applicationUrl: "https://example.com/apply",
+          status: "active",
+          applicationCount: 12,
+          viewCount: 354,
+          startupId: "mock-startup-1",
+          startup: {
+            name: "GreenPower Innovations",
+            logo: "/placeholder-logo.png",
+            country: "Norway"
+          },
+          postedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+          expiresAt: new Date(Date.now() + 23 * 24 * 60 * 60 * 1000),
+          updatedAt: new Date()
+        },
+        {
+          id: "mock-2",
+          title: "Sustainability Consultant",
+          type: "full-time",
+          experienceLevel: "mid",
+          location: {
+            type: "remote",
+            country: "Sweden"
+          },
+          salary: {
+            min: 60000,
+            max: 85000,
+            currency: "EUR"
+          },
+          description: "Help our clients develop and implement sustainability strategies...",
+          requirements: ["3+ years in sustainability consulting", "Bachelor's degree in related field"],
+          responsibilities: ["Conduct sustainability assessments", "Develop action plans for clients"],
+          skills: ["ESG", "Carbon Accounting", "Sustainability Reporting", "Stakeholder Engagement"],
+          department: "Consulting",
+          applicationUrl: "https://example.com/apply",
+          status: "active",
+          applicationCount: 8,
+          viewCount: 245,
+          startupId: "mock-startup-2",
+          startup: {
+            name: "EcoStrategy Partners",
+            logo: "/placeholder-logo.png",
+            country: "Sweden"
+          },
+          postedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+          expiresAt: new Date(Date.now() + 16 * 24 * 60 * 60 * 1000),
+          updatedAt: new Date()
+        }
+      ]);
+    }
 
     return NextResponse.json(jobs);
   } catch (error) {

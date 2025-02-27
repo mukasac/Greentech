@@ -11,18 +11,29 @@ interface CategorySelectorProps {
     main: string;
     sub: string[];
   };
-  onChange: {
+  onChange?: {
     onMainChange: (category: string) => void;
     onSubChange: (categories: string[]) => void;
   };
 }
 
-export const CategorySelector: React.FC<CategorySelectorProps> = ({ selected, onChange }) => {
+export const CategorySelector: React.FC<CategorySelectorProps> = ({
+  selected = { main: "", sub: [] },  // Default value to prevent undefined errors
+  onChange = { onMainChange: () => {}, onSubChange: () => {} }  // Default onChange handler
+}) => {
+  // Ensure selected always has the correct structure
+  const safeSelected = {
+    main: selected?.main || "",
+    sub: selected?.sub || []
+  };
+
   const handleSubcategoryChange = (checked: boolean, subcategoryId: string) => {
-    if (checked) {
-      onChange.onSubChange([...selected.sub, subcategoryId]);
-    } else {
-      onChange.onSubChange(selected.sub.filter(id => id !== subcategoryId));
+    if (onChange) {
+      if (checked) {
+        onChange.onSubChange([...safeSelected.sub, subcategoryId]);
+      } else {
+        onChange.onSubChange(safeSelected.sub.filter(id => id !== subcategoryId));
+      }
     }
   };
 
@@ -32,9 +43,9 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({ selected, on
         <div className="space-y-6">
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Main Category</h3>
-            <RadioGroup 
-              value={selected.main} 
-              onValueChange={onChange.onMainChange}
+            <RadioGroup
+              value={safeSelected.main}
+              onValueChange={onChange?.onMainChange}
             >
               {categories.map((category) => (
                 <div key={category.id} className="flex items-center space-x-2">
@@ -48,14 +59,14 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({ selected, on
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Subcategories</h3>
             <div className="grid gap-4 md:grid-cols-2">
-              {categories
-                .find(cat => cat.id === selected.main)
+              {safeSelected.main && categories
+                .find(cat => cat.id === safeSelected.main)
                 ?.subcategories.map((sub) => (
                   <div key={sub.id} className="flex items-center space-x-2">
-                    <Checkbox 
+                    <Checkbox
                       id={sub.id}
-                      checked={selected.sub.includes(sub.id)}
-                      onCheckedChange={(checked) => 
+                      checked={safeSelected.sub.includes(sub.id)}
+                      onCheckedChange={(checked) =>
                         handleSubcategoryChange(checked as boolean, sub.id)
                       }
                     />
