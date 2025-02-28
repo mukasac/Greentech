@@ -5,16 +5,24 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, MapPin, Users } from "lucide-react";
 import Link from "next/link";
-import { getRegionEvents } from "@/lib/data/events";
+import { Event } from "@/lib/types/event";
 import { usePermissions } from "@/hooks/usePermissions";
 
 interface RegionEventsProps {
   region: string;
+  events: Event[];
 }
 
-export function RegionEvents({ region }: RegionEventsProps) {
-  const events = getRegionEvents(region);
+export function RegionEvents({ region, events }: RegionEventsProps) {
   const { hasPermission } = usePermissions();
+
+  if (!events || events.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No events scheduled in this region.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -25,7 +33,9 @@ export function RegionEvents({ region }: RegionEventsProps) {
               <Badge className="mb-4">{event.type}</Badge>
               <h3 className="text-lg font-semibold mb-2">{event.title}</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                {event.description}
+                {event.description && event.description.length > 120
+                  ? `${event.description.substring(0, 120)}...`
+                  : event.description}
               </p>
 
               <div className="space-y-2 text-sm text-muted-foreground mb-4">
