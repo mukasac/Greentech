@@ -75,7 +75,7 @@ export default function StartupProfilePage({ params }: { params: { id: string } 
         {/* Company Description */}
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold">About {startup.name}</h2>
-          <p className="text-muted-foreground">{startup.description}</p>
+          {/* <p className="text-muted-foreground">{startup.description}</p> */}
           
           {/* Quick Stats */}
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -91,10 +91,7 @@ export default function StartupProfilePage({ params }: { params: { id: string } 
               <Globe className="h-4 w-4" />
               {startup.country}
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Building2 className="h-4 w-4" />
-              {startup.mainCategory.replace("-", " ")}
-            </div>
+            
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Banknote className="h-4 w-4" />
               Funding: {startup.funding}

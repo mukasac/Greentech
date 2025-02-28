@@ -39,7 +39,7 @@ export function StartupCard({ startup }: StartupCardProps) {
           </div>
           <div className="mt-4">
             <h3 className="text-xl font-semibold hover:text-primary">{startup.name}</h3>
-            <p className="text-sm text-muted-foreground">{startup.description}</p>
+            {/* <p className="text-sm text-muted-foreground">{startup.description}</p> */}
           </div>
         </Link>
       </CardHeader>

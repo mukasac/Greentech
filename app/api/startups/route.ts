@@ -22,9 +22,41 @@ interface GalleryImage {
   [key: string]: any; // For any additional properties
 }
 
+// export async function GET(req: Request) {
+//   try {
+//     const { searchParams } = new URL(req.url);
+//     const category = searchParams.get("category");
+//     const region = searchParams.get("region");
+
+//     const where = {
+//       ...(category && { mainCategory: category }),
+//       ...(region && { country: region }),
+//     };
+
+//     const startups = await db.startup.findMany({
+//       where,
+//       include: {
+//         team: true,
+//         gallery: true,
+//       },
+//     });
+
+//     return NextResponse.json(startups);
+//   } catch (error) {
+//     return NextResponse.json(
+//       { error: "Failed to fetch startups" },
+//       { status: 500 }
+//     );
+//   }
+// }
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const skip = (page - 1) * limit;
+
     const category = searchParams.get("category");
     const region = searchParams.get("region");
 
@@ -33,15 +65,27 @@ export async function GET(req: Request) {
       ...(region && { country: region }),
     };
 
+    const totalCount = await db.startup.count({ where });
+
     const startups = await db.startup.findMany({
       where,
       include: {
         team: true,
         gallery: true,
       },
+      skip,
+      take: limit,
     });
 
-    return NextResponse.json(startups);
+    return NextResponse.json({
+      startups,
+      pagination: {
+        total: totalCount,
+        pages: Math.ceil(totalCount / limit),
+        current: page,
+        limit,
+      },
+    });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch startups" },
@@ -49,7 +93,6 @@ export async function GET(req: Request) {
     );
   }
 }
-
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -68,8 +111,8 @@ export async function POST(req: Request) {
       funding,
       teamMembers,
       galleryImages,
-      mainCategory = "renewable-energy",
-      subcategories = [],
+      // mainCategory = "renewable-energy",
+      // subcategories = [],
       country = "norway", // Default to Norway if not provided
       tags = [],
     } = body;
@@ -91,8 +134,8 @@ export async function POST(req: Request) {
           funding,
           logo: body.logo || defaultLogo,
           profileImage: body.profileImage || defaultProfileImage,
-          mainCategory,
-          subcategories,
+          // mainCategory,
+          // subcategories,
           country,
           tags,
           userId: session.user.id,
@@ -135,9 +178,9 @@ export async function POST(req: Request) {
   } catch (error: unknown) {
     console.error("Startup creation error:", error);
     return NextResponse.json(
-      { 
-        error: "Error creating startup", 
-        details: error instanceof Error ? error.message : "Unknown error" 
+      {
+        error: "Error creating startup",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
