@@ -1,3 +1,4 @@
+// api/regions/[region]/route.ts
 import { NextResponse } from "next/server";
 import { RegionService } from "@/lib/services/region-service";
 

@@ -84,30 +84,30 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       icon: <Newspaper className="mr-2 h-4 w-4" />,
       exact: false
     },
-    { 
-      title: "Users", 
-      href: "/admin/users", 
-      icon: <Users className="mr-2 h-4 w-4" />,
-      exact: false
-    },
+    //{ 
+      //title: "Users", 
+      //href: "/admin/users", 
+      //icon: <Users className="mr-2 h-4 w-4" />,
+      //exact: false
+    //},
     { 
       title: "Events", 
       href: "/admin/events", 
       icon: <Calendar className="mr-2 h-4 w-4" />,
       exact: false
     },
-    { 
-      title: "Jobs", 
-      href: "/admin/jobs", 
-      icon: <Briefcase className="mr-2 h-4 w-4" />,
-      exact: false
-    },
-    { 
-      title: "Startups", 
-      href: "/admin/startups", 
-      icon: <Building className="mr-2 h-4 w-4" />,
-      exact: false
-    },
+    //{ 
+      //title: "Jobs", 
+      //href: "/admin/jobs", 
+      //icon: <Briefcase className="mr-2 h-4 w-4" />,
+      //exact: false
+    //},
+    //{ 
+      //title: "Startups", 
+      //href: "/admin/startups", 
+      //icon: <Building className="mr-2 h-4 w-4" />,
+      //exact: false
+    //},
     { 
       title: "Regions", 
       href: "/admin/regions", 

@@ -333,8 +333,7 @@ model EcosystemPartner {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-<<<<<<< HEAD
-  @@index([startupId])
+  // Removed the incorrect index for startupId which doesn't exist in this model
 }
 
 model StartupCategory {
@@ -344,7 +343,6 @@ model StartupCategory {
   categoryId Int
 
   @@id([startupId, categoryId])
-=======
-  @@index([regionId])
->>>>>>> a94fd045b0a9730eaefe170ecfed32c6da860222
+
+  // Removed the incorrect index for regionId which doesn't exist in this model
 }
