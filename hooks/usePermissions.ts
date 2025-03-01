@@ -11,6 +11,11 @@ export function usePermissions() {
    * @returns boolean indicating if the user has the permission
    */
   const hasPermission = (permissionName: string): boolean => {
+    // Special case: CLAIM_STARTUP permission is available to everyone
+    if (permissionName === "CLAIM_STARTUP") {
+      return true;
+    }
+    
     // If no session or no user, no permissions
     if (!session?.user) {
       return false;
@@ -39,6 +44,10 @@ export function usePermissions() {
    * @returns boolean indicating if the user has any of the permissions
    */
   const hasAnyPermission = (permissionNames: string[]): boolean => {
+    // If CLAIM_STARTUP is one of the requested permissions, check it first
+    if (permissionNames.includes("CLAIM_STARTUP")) {
+      return true;
+    }
     return permissionNames.some(permission => hasPermission(permission));
   };
 

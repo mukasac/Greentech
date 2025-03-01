@@ -73,12 +73,13 @@ export function StartupCard({ startup }: StartupCardProps) {
           </Link>
         </Button>
         {hasPermission("CLAIM_STARTUP") && (
-          <Button variant="outline" asChild>
-            <Link href={`/startups/${startup.id}/claim`}>
-              Claim Startup
-            </Link>
-          </Button>
-        )}
+  <Button variant="outline" asChild>
+    <Link href={`/auth/register?claim=${startup.id}`}>
+      Claim Startup
+    </Link>
+  </Button>
+)}
+        
       </CardFooter>
     </Card>
   );

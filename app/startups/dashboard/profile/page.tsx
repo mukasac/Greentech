@@ -1,7 +1,7 @@
-// app/startups/dashboard/profile/page.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
   Card, 
   CardContent, 
@@ -23,6 +23,10 @@ import Link from "next/link";
 import { usePermissions } from "@/hooks/usePermissions";
 
 export default function StartupProfilePage() {
+  // Get startup ID from URL if present (for redirects after claiming)
+  const searchParams = useSearchParams();
+  const startupIdFromUrl = searchParams.get('startupId');
+  
   const [startup, setStartup] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +35,12 @@ export default function StartupProfilePage() {
   useEffect(() => {
     const fetchStartupData = async () => {
       try {
-        const response = await fetch('/api/startups/current');
+        // If we have a specific startup ID from the URL, fetch that one
+        const endpoint = startupIdFromUrl 
+          ? `/api/startups/${startupIdFromUrl}` 
+          : '/api/startups/current';
+          
+        const response = await fetch(endpoint);
         if (!response.ok) throw new Error('Failed to fetch startup data');
         const data = await response.json();
         setStartup(data);
@@ -43,7 +52,7 @@ export default function StartupProfilePage() {
     };
 
     fetchStartupData();
-  }, []);
+  }, [startupIdFromUrl]);
 
   if (loading) {
     return (
@@ -133,20 +142,20 @@ export default function StartupProfilePage() {
               </TabsContent>
 
               <TabsContent value="analytics">
-  {(hasPermission("ADMIN_ACCESS") || hasPermission("VIEW_STARTUP_DASHBOARD")) ? (
-    <AnalyticsSection startup={startup} />
-  ) : (
-    <Card>
-      <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-        <BarChart className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium mb-2">Access Required</h3>
-        <p className="text-sm text-muted-foreground">
-          You dont have permission to view analytics data.
-        </p>
-      </CardContent>
-    </Card>
-  )}
-</TabsContent>
+                {(hasPermission("ADMIN_ACCESS") || hasPermission("VIEW_STARTUP_DASHBOARD")) ? (
+                  <AnalyticsSection startup={startup} />
+                ) : (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                      <BarChart className="h-12 w-12 text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-medium mb-2">Access Required</h3>
+                      <p className="text-sm text-muted-foreground">
+                        You dont have permission to view analytics data.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
             </div>
           </Tabs>
         </CardContent>

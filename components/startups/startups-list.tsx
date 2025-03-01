@@ -11,6 +11,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationData {
@@ -88,7 +89,7 @@ export function StartupsList() {
     // }
 
     fetchStartups(pagination.current);
-  }, [category, region]);
+  }, [category, region, pagination.current, pagination.limit]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > pagination.pages) return;
@@ -128,14 +129,14 @@ export function StartupsList() {
 
       {pagination.pages > 1 && (
         <div className="flex justify-center items-center mt-8 gap-2">
-          <button
+          <Button
             variant="outline"
             size="sm"
             onClick={() => handlePageChange(pagination.current - 1)}
             disabled={pagination.current === 1}
           >
             <ChevronLeft className="h-4 w-4" />
-          </button>
+          </Button>
           <div className="flex items-center gap-1">
             {Array.from({ length: pagination.pages }, (_, i) => i + 1)
               .filter((page) => {
@@ -151,7 +152,7 @@ export function StartupsList() {
                   {index > 0 && array[index - 1] !== page - 1 && (
                     <span className="px-2">...</span>
                   )}
-                  <button
+                  <Button
                     variant={
                       pagination.current === page ? "default" : "outline"
                     }
@@ -160,18 +161,18 @@ export function StartupsList() {
                     className="h-8 w-8 p-0"
                   >
                     {page}
-                  </button>
+                  </Button>
                 </React.Fragment>
               ))}
           </div>
-          <button
+          <Button
             variant="outline"
             size="sm"
             onClick={() => handlePageChange(pagination.current + 1)}
             disabled={pagination.current === pagination.pages}
           >
             <ChevronRight className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       )}
       {/* Pagination Summary */}
