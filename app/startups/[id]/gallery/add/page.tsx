@@ -29,6 +29,7 @@ export default function AddGalleryImagePage({ params }: AddGalleryImageProps) {
     file: null as File | null
   });
 
+ 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -56,7 +57,7 @@ export default function AddGalleryImagePage({ params }: AddGalleryImageProps) {
     setError(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit2 = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
@@ -119,6 +120,99 @@ export default function AddGalleryImagePage({ params }: AddGalleryImageProps) {
       setIsSubmitting(false);
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+  
+    try {
+      if (!formData.file) {
+        throw new Error("Please select an image to upload");
+      }
+  
+      // Generate unique filename
+      const timestamp = Date.now();
+      const randomString = Math.random().toString(36).substring(2, 15);
+      const fileExt = formData.file.name.split(".").pop();
+      const fileName = `${params.id}/${timestamp}-${randomString}.${fileExt}`;
+  
+      // Upload to Supabase
+      const { error: uploadError } = await supabase.storage
+        .from("gallery")
+        .upload(fileName, formData.file, { cacheControl: "3600", upsert: false });
+  
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw new Error("Failed to upload image");
+      }
+  
+      // Get public URL
+      const { data } = supabase.storage
+        .from("gallery")
+        .getPublicUrl(fileName);
+  
+      const publicUrl = data.publicUrl;
+  
+      // Send to API route
+      const response = await fetch(`/api/startups/${params.id}/gallery`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: publicUrl,
+          alt: formData.alt || formData.file.name,
+          caption: formData.caption,
+        }),
+      });
+  
+      console.log('params response...', params);
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Failed to add image to database");
+      }
+  
+      setSuccess("Image added successfully!");
+      setTimeout(() => {
+        router.push(`/startups/dashboard/gallery`);
+        router.refresh();
+      }, 2000);
+    } catch (err) {
+      console.error("Error adding image:", err);
+  
+      // Fallback: Direct Supabase Insertion if API fails
+      if (err instanceof Error && err.message.includes("Failed to add image to database")) {
+        try {
+          const { error: dbError } = await supabase
+            .from("gallery")
+            .insert({
+              url: publicUrl,
+              alt: formData.alt || formData.file.name,
+              caption: formData.caption,
+              startupId: params.id,
+            });
+  
+          if (dbError) {
+            throw new Error("Failed to save gallery entry");
+          }
+  
+          setSuccess("Image added successfully!");
+          setTimeout(() => {
+            router.push(`/startups/${params.id}/gallery`);
+            router.refresh();
+          }, 2000);
+        } catch (fallbackErr) {
+          console.error("Fallback error:", fallbackErr);
+          setError("Failed to save gallery entry");
+        }
+      } else {
+        setError(err instanceof Error ? err.message : "Failed to add image");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+
 
   return (
     <div className="container py-8">

@@ -124,6 +124,11 @@ export default function StartupDashboardPage() {
                             Edit Profile
                           </Link>
                         </Button>
+                        <Button size="sm" asChild>
+                          <Link href={`/startups/${startup.id}/gallery/add`}>
+                            Add Image
+                          </Link>
+                        </Button>
                       </div>
                     </div>
 
