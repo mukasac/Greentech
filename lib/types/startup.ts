@@ -1,5 +1,4 @@
 // lib/types/startup.ts
-
 // Base interfaces
 export interface TeamMember {
   id: string;
@@ -113,40 +112,140 @@ export interface BlogComment {
   createdAt: Date;
 }
 
-// New Climate Impact interfaces
-export interface LifecycleImpact {
-  circularity?: number;
-  recycledMaterials?: number;
-  wasteReduction?: number;
-  supplyChainReduction?: number;
-  description?: string;
-}
-
-export interface ClimateImpact {
-  id: string;
-  isActive: boolean;
-  
-  // Impact Metrics
+// Updated Impact Metrics Interface
+export interface ImpactMetrics {
+  // Core metrics (original ones)
   co2Reduction?: number;
   waterSaved?: number;
   energyEfficiency?: number;
   wasteDiverted?: number;
   biodiversityImpact?: string;
+  
+  // Emissions & Energy
+  renewableEnergyGenerated?: number;
+  ghgEmissions?: number;
+  digitalSustainability?: string;
+  
+  // Water & Resources
+  waterQualityImprovement?: number;
+  resourceEfficiency?: number;
+  plasticReduction?: number;
+  
+  // Biodiversity & Land
+  landAreaPreserved?: number;
+  habitatCreation?: string;
+  speciesProtected?: number;
+  soilHealthImprovement?: number;
+  desertificationPrevention?: string;
+  ecosystemServicesValue?: number;
+  
+  // Social & Health
+  healthcareImpacts?: string;
+  socialImpactMetrics?: string;
+  environmentalJusticeMetrics?: string;
+  
+  // Pollution Reduction
+  airQualityImprovement?: number;
+  chemicalPollutionReduction?: number;
+  noisePollutionReduction?: number;
+  
+  // Other Impacts
+  climateResilienceContribution?: string;
+  circularEconomyContribution?: number;
+  sustainableFoodProduction?: number;
+  foodWasteReduction?: number;
+  oceanHealthImpact?: string;
+  technologyTransfer?: string;
+  sustainableTransportationImpact?: number;
+  urbanSustainabilityMetrics?: string;
+  greenBuildingImpact?: number;
+  sustainableAgricultureImpact?: number;
+}
 
+// Updated Lifecycle Impact Interface
+export interface LifecycleImpact {
+  // Core metrics (original ones)
+  circularity?: number;
+  recycledMaterials?: number;
+  wasteReduction?: number;
+  supplyChainReduction?: number;
+  description?: string;
+  
+  // Materials & Design
+  repairabilityScore?: number;
+  designForDisassembly?: number;
+  biodegradableMaterials?: number;
+  biomimicryImplementation?: string;
+  
+  // Production & Manufacturing
+  manufacturingEfficiency?: string;
+  waterUsageInProduction?: number;
+  renewableEnergyInProduction?: number;
+  toxicMaterialElimination?: number;
+  manufacturingEnergyIntensity?: number;
+  workerHealthSafety?: number;
+  byproductValorization?: number;
+  greenChemistryPrinciples?: number;
+  
+  // Supply Chain
+  materialSourcingEthics?: number;
+  supplyChainTransparency?: number;
+  conflictMineralsPolicy?: string;
+  sustainableProcurementScore?: number;
+  transportationFootprint?: number;
+  logisticsOptimization?: number;
+  
+  // Product Use & Performance
+  productLifespan?: number;
+  productCarbonFootprint?: number;
+  waterFootprintOfProduct?: number;
+  durabilityTestingResults?: string;
+  plannedObsolescenceAvoidance?: string;
+  
+  // End-of-Life & Circularity
+  endOfLifeRecoveryRate?: number;
+  takeBackPrograms?: string;
+  remanufacturingCapability?: number;
+  upcyclingPotential?: number;
+  extendedProducerResponsibility?: string;
+  
+  // Assessment & Documentation
+  lcaResults?: string;
+  productEnvironmentalFootprint?: string;
+  digitalProductPassport?: string;
+  materialPassport?: string;
+  socialLCAMetrics?: string;
+}
+
+// Updated Climate Impact interface
+export interface ClimateImpact {
+  id: string;
+  isActive: boolean;
+  
+  // Impact Metrics - can use both specific fields and the metrics object
+  co2Reduction?: number;
+  waterSaved?: number;
+  energyEfficiency?: number;
+  wasteDiverted?: number;
+  biodiversityImpact?: string;
+  
+  // Full metrics object for comprehensive data
+  metrics?: ImpactMetrics;
+  
   // Carbon Footprint
   carbonCaptured?: number;
   lifecycleCo2Reduction?: number;
   offsetPrograms?: string;
-
+  
   // SDGs and Certifications
   sdgs: number[];
   sdgImpact?: string;
   certifications: string[];
   awards?: string;
-
-  // Lifecycle Impact
+  
+  // Lifecycle Impact - can use both specific fields and the lifecycle object
   lifecycle?: LifecycleImpact;
-
+  
   startupId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -180,7 +279,7 @@ export interface Startup {
   jobs: Job[];
   blogPosts: BlogPost[];
   documents: Document[];
-  climateImpacts: ClimateImpact[]; // New field
+  climateImpacts: ClimateImpact[]; // Now using the updated interface
   createdAt: Date;
   updatedAt: Date;
 }

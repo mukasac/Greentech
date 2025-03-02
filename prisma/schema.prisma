@@ -254,22 +254,36 @@ model AnalyticsEvent {
   createdAt DateTime @default(now())
 }
 
+// Updated ClimateImpact model with metrics JSON field
 model ClimateImpact {
   id                String   @id @default(cuid())
   isActive          Boolean  @default(true)
+  
+  // Original metrics fields for backward compatibility
   co2Reduction      Float?
   waterSaved        Float?
   energyEfficiency  Float?
   wasteDiverted     Float?
   biodiversityImpact String?  @db.Text
+  
+  // New field for storing all impact metrics as JSON
+  metrics           Json?
+  
+  // Carbon footprint fields
   carbonCaptured    Float?
   lifecycleCo2Reduction Float?
   offsetPrograms    String?  @db.Text
+  
+  // SDGs and certifications
   sdgs              Int[]
   sdgImpact         String?  @db.Text
   certifications    String[]
   awards            String?  @db.Text
+  
+  // Lifecycle data - expanded from original version
   lifecycle         Json?
+  
+  // Relations and timestamps
   startupId         String
   startup           Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
   createdAt         DateTime @default(now())
@@ -332,8 +346,6 @@ model EcosystemPartner {
   region    Region   @relation(fields: [regionId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Removed the incorrect index for startupId which doesn't exist in this model
 }
 
 model StartupCategory {
@@ -343,6 +355,4 @@ model StartupCategory {
   categoryId Int
 
   @@id([startupId, categoryId])
-
-  // Removed the incorrect index for regionId which doesn't exist in this model
 }
