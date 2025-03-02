@@ -1,6 +1,60 @@
+// lib/services/region-service.ts
 import { db } from "@/lib/db";
 import { regions } from "@/lib/data/regions"; // Fallback data
 import { Region } from "@/lib/types/region";
+
+// Define the proper type for ecosystem partners
+type PartnerType = "accelerator" | "investor" | "university" | "government";
+
+interface Initiative {
+  title: string;
+  description: string;
+}
+
+interface EcosystemPartner {
+  name: string;
+  logo: string;
+  type: PartnerType;
+}
+
+// Define default content for ecosystem sections if missing from database
+const DEFAULT_INITIATIVES: Initiative[] = [
+  {
+    title: "Green Energy Transition",
+    description: "Supporting the shift towards renewable energy sources across the region."
+  },
+  {
+    title: "Circular Economy",
+    description: "Promoting sustainable production and consumption models to minimize waste."
+  },
+  {
+    title: "Climate Innovation Hub",
+    description: "Accelerating and supporting startups focused on climate change solutions."
+  }
+];
+
+const DEFAULT_PARTNERS: EcosystemPartner[] = [
+  {
+    name: "Regional Innovation Hub",
+    logo: "/placeholder-logo.png",
+    type: "accelerator"
+  },
+  {
+    name: "Green Tech University",
+    logo: "/placeholder-logo.png",
+    type: "university"
+  },
+  {
+    name: "Sustainable Ventures",
+    logo: "/placeholder-logo.png",
+    type: "investor"
+  },
+  {
+    name: "Environment Ministry",
+    logo: "/placeholder-logo.png",
+    type: "government"
+  }
+];
 
 /**
  * Service for fetching region data from the database
@@ -49,145 +103,84 @@ export const RegionService = {
       });
 
       if (region) {
-        return region as unknown as Region;
+        // Ensure the region has initiatives and ecosystem partners
+        const enhancedRegion = { ...region } as unknown as Region;
+        
+        // Add default initiatives if missing
+        if (!enhancedRegion.initiatives || enhancedRegion.initiatives.length === 0) {
+          enhancedRegion.initiatives = DEFAULT_INITIATIVES;
+        }
+        
+        // Add default partners if missing
+        if (!enhancedRegion.ecosystemPartners || enhancedRegion.ecosystemPartners.length === 0) {
+          enhancedRegion.ecosystemPartners = DEFAULT_PARTNERS;
+        }
+        
+        return enhancedRegion;
       }
 
       // Fallback to mock data
-      return regions.find(r => r.slug === slug) || null;
+      const mockRegion = regions.find(r => r.slug === slug);
+      
+      // If mock region exists, enhance it with default initiatives and partners if needed
+      if (mockRegion) {
+        const enhancedMockRegion = { ...mockRegion };
+        
+        if (!enhancedMockRegion.initiatives || enhancedMockRegion.initiatives.length === 0) {
+          enhancedMockRegion.initiatives = DEFAULT_INITIATIVES;
+        }
+        
+        if (!enhancedMockRegion.ecosystemPartners || enhancedMockRegion.ecosystemPartners.length === 0) {
+          enhancedMockRegion.ecosystemPartners = DEFAULT_PARTNERS;
+        }
+        
+        return enhancedMockRegion;
+      }
+      
+      return null;
     } catch (error) {
       console.error(`Error fetching region ${slug}:`, error);
-      // Fallback to mock data
-      return regions.find(r => r.slug === slug) || null;
-    }
-  },
-
-  /**
-   * Get region startups
-   */
-  async getRegionStartups(regionSlug: string, limit = 3) {
-    try {
-      const startups = await db.startup.findMany({
-        where: {
-          country: regionSlug
-        },
-        take: limit,
-        orderBy: {
-          createdAt: 'desc'
+      // Fallback to mock data with enhancements
+      const mockRegion = regions.find(r => r.slug === slug);
+      
+      if (mockRegion) {
+        const enhancedMockRegion = { ...mockRegion };
+        
+        if (!enhancedMockRegion.initiatives || enhancedMockRegion.initiatives.length === 0) {
+          enhancedMockRegion.initiatives = DEFAULT_INITIATIVES;
         }
-      });
-
-      return startups;
-    } catch (error) {
-      console.error(`Error fetching startups for region ${regionSlug}:`, error);
-      // Return empty array or fetch from mockup data as fallback
-      return [];
-    }
-  },
-
-  /**
-   * Get region news
-   */
-  async getRegionNews(regionSlug: string, limit = 3) {
-    try {
-      const news = await db.news.findMany({
-        where: {
-          region: regionSlug
-        },
-        take: limit,
-        orderBy: {
-          publishedAt: 'desc'
+        
+        if (!enhancedMockRegion.ecosystemPartners || enhancedMockRegion.ecosystemPartners.length === 0) {
+          enhancedMockRegion.ecosystemPartners = DEFAULT_PARTNERS;
         }
-      });
-
-      return news;
-    } catch (error) {
-      console.error(`Error fetching news for region ${regionSlug}:`, error);
-      return [];
-    }
-  },
-
-  /**
-   * Get region events
-   */
-  async getRegionEvents(regionSlug: string, limit = 3) {
-    try {
-      const events = await db.event.findMany({
-        where: {
-          region: regionSlug,
-          date: {
-            gte: new Date() // Only future events
-          }
-        },
-        take: limit,
-        orderBy: {
-          date: 'asc' // Upcoming events first
-        }
-      });
-
-      return events;
-    } catch (error) {
-      console.error(`Error fetching events for region ${regionSlug}:`, error);
-      return [];
-    }
-  },
-
-  /**
-   * Get region jobs
-   */
-  async getRegionJobs(regionSlug: string, limit = 3) {
-    try {
-      const jobs = await db.job.findMany({
-        where: {
-          location: {
-            path: ['country'],
-            equals: regionSlug
-          },
-          status: 'active'
-        },
-        take: limit,
-        orderBy: {
-          postedAt: 'desc'
-        },
-        include: {
-          startup: {
-            select: {
-              name: true,
-              logo: true,
-              country: true
-            }
-          }
-        }
-      });
-
-      return jobs;
-    } catch (error) {
-      console.error(`Error fetching jobs for region ${regionSlug}:`, error);
-      return [];
+        
+        return enhancedMockRegion;
+      }
+      
+      return null;
     }
   },
 
   /**
    * Get all region data in a single call
+   * Note: We maintain this method for backward compatibility,
+   * but we're no longer fetching startups, news, events, and jobs
    */
   async getRegionData(regionSlug: string) {
     try {
-      const [region, startups, news, events, jobs] = await Promise.all([
-        this.getRegionBySlug(regionSlug),
-        this.getRegionStartups(regionSlug),
-        this.getRegionNews(regionSlug),
-        this.getRegionEvents(regionSlug),
-        this.getRegionJobs(regionSlug)
-      ]);
+      const region = await this.getRegionBySlug(regionSlug);
 
+      // We return an object with only the region but maintain the structure
+      // for backward compatibility with existing code
       return {
         region,
-        startups,
-        news,
-        events,
-        jobs
+        startups: [],
+        news: [],
+        events: [],
+        jobs: []
       };
     } catch (error) {
-      console.error(`Error fetching all data for region ${regionSlug}:`, error);
+      console.error(`Error fetching data for region ${regionSlug}:`, error);
       throw error;
     }
   }
