@@ -187,11 +187,9 @@ export function Navigation() {
                   </Tooltip>
                 </TooltipProvider>
                 <DropdownMenuContent align="end">
-                  {hasPermission("ADMIN_ACCESS") && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/startups/dashboard">Dashboard</Link>
-                    </DropdownMenuItem>
-                  )}
+                  <DropdownMenuItem asChild>
+                    <Link href="/startups/dashboard">Dashboard</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/profile">Profile</Link>
                   </DropdownMenuItem>
