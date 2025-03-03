@@ -20,73 +20,39 @@ export default function GalleryManagementPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState<GalleryImage[]>([]);
-  const { data: session } = useSession(); // Get user session from NextAuth
+  const { data: session } = useSession(); 
+  const { status } = useSession();
 
   // const params = useParams();
   // const startupId = params?.id;
 
   useEffect(() => {
-    // const fetchGalleryImages = async () => {
-    //   try {
-    //     // Fetch all gallery images since RLS is disabled
-    //     const { data: galleryImages, error: galleryError } = await supabase
-    //       .from("gallery")
-    //       .select("*")
-    //       .order("created_at", { ascending: false });
-
-    //     if (galleryError) throw galleryError;
-    //     setImages(galleryImages || []);
-    //   } catch (error) {
-    //     console.error("Error fetching data:", error);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-
-    // fetchGalleryImages();
 
     const fetchGalleryImages = async () => {
       try {
-        if (!session) {
-          console.error("No active session found!");
+        if (status !== "authenticated") {
           return;
         }
-        console.log("session:...... ", session);
-        const userId = session.user.id; // Get logged-in user's ID
-        console.log("userId:...... ", userId);
-        // Get user's startups by user ID
-        const { data: startups, error: startupsError } = await supabase
-        .from("startups")
-        .select("id")
-        .eq("user_id", userId); 
         
-        if (startupsError) throw startupsError;
-        if (!startups.length) {
-          setImages([]);
-          return;
+        const response = await fetch("/api/gallery");
+        console.log('response......', response);
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
         }
-
-        const startupIds = startups.map((s) => s.id); // Extract startup IDs
-        console.log("startupIds:...... ", startupIds);
-        // Fetch gallery images that belong to user's startups
-        const { data: galleryImages, error: galleryError } = await supabase
-          .from("gallery")
-          .select("*")
-          .in("startup_id", startupIds)
-          .order("created_at", { ascending: false });
-
-        if (galleryError) throw galleryError;
-
-        setImages(galleryImages || []);
+        
+        const data = await response.json();
+        setImages(data.images);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching gallery data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchGalleryImages();
-  }, [session, router]);
+    if (status !== "loading") {
+      fetchGalleryImages();
+    }
+  }, [status]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -116,12 +82,14 @@ export default function GalleryManagementPage() {
           </div>
           <h2 className="mb-2 text-xl font-semibold">No Gallery Images Yet</h2>
           <p className="mb-6 text-center text-muted-foreground">
-            Add your first image to showcase your startup.
+            Claim a Startup to showcase your gallery images and media
+            {/* Add your first image to showcase your startup. */}
           </p>
           <Button asChild>
-            <Link href={`/startups/gallery/add`}>
+            <Link href={`/startups`}>
               <ImagePlus className="mr-2 h-4 w-4" />
-              Add First Image
+              {/* Add First Image */}
+              Claim Startup
             </Link>
           </Button>
         </div>

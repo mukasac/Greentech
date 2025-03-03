@@ -26,6 +26,8 @@ export async function GET(
   }
 }
 
+
+
 // export async function POST(
 //   req: Request,
 //   { params }: { params: { id: string } }
@@ -93,7 +95,6 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Get the current session
     const session = await getServerSession(authOptions);
 
     // Check if the user is authenticated
@@ -102,8 +103,6 @@ export async function POST(
     }
 
     const startupId = params.id;
-console.log("Startup ID route.......:", startupId);
-    // Check if the startup exists and if the user owns it or has admin access
     const startup = await db.startup.findUnique({
       where: { id: startupId },
       select: { userId: true },
@@ -113,7 +112,6 @@ console.log("Startup ID route.......:", startupId);
       return NextResponse.json({ error: "Startup not found" }, { status: 404 });
     }
 
-    // Ensure the user has permission to add images to this startup
     if (
       startup.userId !== session.user.id &&
       !session.user.permissions?.includes("ADMIN_ACCESS")
