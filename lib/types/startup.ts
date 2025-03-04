@@ -266,6 +266,15 @@ export interface Startup {
   funding: string;
   employees: string;
   tags: string[];
+  
+  // Stage field (for backward compatibility)
+  stage?: string;
+  
+  // New fields for startup stages and funding
+  startupStage?: string; // idea, mvp, early-traction, growth, maturity
+  investmentStage?: string; // pre-seed, seed, series-a, series-b, series-c-plus, exit, bootstrapping
+  fundingNeeds?: string; // looking, not-looking
+  
   status: string; // active, pending, archived
   featured: boolean;
   sustainability?: {

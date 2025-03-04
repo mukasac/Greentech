@@ -43,6 +43,11 @@ interface StartupFormData {
   tags: string[];
   socialLinks: SocialLinks;
   sustainability: Sustainability;
+  // Add the missing properties
+  stage?: string;
+  startupStage?: string;
+  investmentStage?: string;
+  fundingNeeds?: string;
 }
 
 interface CategorySelectorProps {
@@ -88,7 +93,12 @@ export function EnhancedEditForm({ startupId }: EnhancedEditFormProps) {
     sustainability: {
       impact: "",
       sdgs: []
-    }
+    },
+    // Initialize the missing properties with empty values
+    stage: "",
+    startupStage: "",
+    investmentStage: "",
+    fundingNeeds: ""
   });
 
   useEffect(() => {
@@ -97,7 +107,22 @@ export function EnhancedEditForm({ startupId }: EnhancedEditFormProps) {
         const response = await fetch(`/api/startups/${startupId}`);
         if (!response.ok) throw new Error("Failed to fetch startup data");
         const data = await response.json();
-        setFormData(data);
+        
+        // Ensure socialLinks and sustainability exist in the fetched data
+        const safeData = {
+          ...data,
+          socialLinks: data.socialLinks || {
+            linkedin: "",
+            twitter: "",
+            facebook: ""
+          },
+          sustainability: data.sustainability || {
+            impact: "",
+            sdgs: []
+          }
+        };
+        
+        setFormData(safeData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch startup data");
       } finally {
@@ -114,13 +139,20 @@ export function EnhancedEditForm({ startupId }: EnhancedEditFormProps) {
     section?: 'socialLinks' | 'sustainability'
   ) => {
     if (section) {
-      setFormData(prev => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [field]: value
-        }
-      }));
+      setFormData(prev => {
+        // Ensure the section exists before updating it
+        const sectionData = prev[section] || 
+          (section === 'socialLinks' ? { linkedin: '', twitter: '', facebook: '' } : 
+           section === 'sustainability' ? { impact: '', sdgs: [] } : {});
+        
+        return {
+          ...prev,
+          [section]: {
+            ...sectionData,
+            [field]: value
+          }
+        };
+      });
     } else {
       setFormData(prev => ({
         ...prev,
@@ -250,7 +282,7 @@ export function EnhancedEditForm({ startupId }: EnhancedEditFormProps) {
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="employees">Number of Employees</Label>
                   <Input
@@ -269,6 +301,76 @@ export function EnhancedEditForm({ startupId }: EnhancedEditFormProps) {
                     onChange={(e) => handleChange("funding", e.target.value)}
                     required
                   />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="stage">Legacy Stage (for backward compatibility)</Label>
+                  <select
+                    id="stage"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={formData.stage || ""}
+                    onChange={(e) => handleChange("stage", e.target.value)}
+                  >
+                    <option value="">Select a stage</option>
+                    <option value="Idea">Idea</option>
+                    <option value="Pre-seed">Pre-seed</option>
+                    <option value="Seed">Seed</option>
+                    <option value="Series A">Series A</option>
+                    <option value="Series B">Series B</option>
+                    <option value="Series C+">Series C+</option>
+                    <option value="Growth">Growth</option>
+                    <option value="Established">Established</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="startupStage">Startup Stage</Label>
+                  <select
+                    id="startupStage"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={formData.startupStage || ""}
+                    onChange={(e) => handleChange("startupStage", e.target.value)}
+                  >
+                    <option value="">Select startup stage</option>
+                    <option value="idea">Idea</option>
+                    <option value="mvp">MVP</option>
+                    <option value="early-traction">Early Traction</option>
+                    <option value="growth">Growth</option>
+                    <option value="maturity">Maturity</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="investmentStage">Investment Stage</Label>
+                  <select
+                    id="investmentStage"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={formData.investmentStage || ""}
+                    onChange={(e) => handleChange("investmentStage", e.target.value)}
+                  >
+                    <option value="">Select investment stage</option>
+                    <option value="pre-seed">Pre-seed</option>
+                    <option value="seed">Seed</option>
+                    <option value="series-a">Series A</option>
+                    <option value="series-b">Series B</option>
+                    <option value="series-c-plus">Series C+</option>
+                    <option value="exit">Exit</option>
+                    <option value="bootstrapping">Bootstrapping</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="fundingNeeds">Funding Needs</Label>
+                  <select
+                    id="fundingNeeds"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={formData.fundingNeeds || ""}
+                    onChange={(e) => handleChange("fundingNeeds", e.target.value)}
+                  >
+                    <option value="">Select funding needs</option>
+                    <option value="looking">Looking for funding</option>
+                    <option value="not-looking">Not looking for funding</option>
+                  </select>
                 </div>
               </div>
             </CardContent>
@@ -307,7 +409,7 @@ export function EnhancedEditForm({ startupId }: EnhancedEditFormProps) {
                   <Label htmlFor="linkedin">LinkedIn</Label>
                   <Input
                     id="linkedin"
-                    value={formData.socialLinks.linkedin}
+                    value={formData.socialLinks?.linkedin || ""}
                     onChange={(e) => handleChange("linkedin", e.target.value, "socialLinks")}
                     placeholder="LinkedIn URL"
                   />
@@ -317,7 +419,7 @@ export function EnhancedEditForm({ startupId }: EnhancedEditFormProps) {
                   <Label htmlFor="twitter">Twitter</Label>
                   <Input
                     id="twitter"
-                    value={formData.socialLinks.twitter}
+                    value={formData.socialLinks?.twitter || ""}
                     onChange={(e) => handleChange("twitter", e.target.value, "socialLinks")}
                     placeholder="Twitter URL"
                   />
@@ -327,7 +429,7 @@ export function EnhancedEditForm({ startupId }: EnhancedEditFormProps) {
                   <Label htmlFor="facebook">Facebook</Label>
                   <Input
                     id="facebook"
-                    value={formData.socialLinks.facebook}
+                    value={formData.socialLinks?.facebook || ""}
                     onChange={(e) => handleChange("facebook", e.target.value, "socialLinks")}
                     placeholder="Facebook URL"
                   />
@@ -373,7 +475,7 @@ export function EnhancedEditForm({ startupId }: EnhancedEditFormProps) {
                 <Label htmlFor="impact">Sustainability Impact</Label>
                 <Textarea
                   id="impact"
-                  value={formData.sustainability.impact}
+                  value={formData.sustainability?.impact || ""}
                   onChange={(e) => handleChange("impact", e.target.value, "sustainability")}
                   rows={4}
                 />

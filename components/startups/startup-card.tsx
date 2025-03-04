@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Globe, Users } from "lucide-react";
+import { Calendar, Globe, Users, Circle, Banknote, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -39,7 +39,7 @@ export function StartupCard({ startup }: StartupCardProps) {
           </div>
           <div className="mt-4">
             <h3 className="text-xl font-semibold hover:text-primary">{startup.name}</h3>
-            {/* <p className="text-sm text-muted-foreground">{startup.description}</p> */}
+            <p className="text-sm text-muted-foreground">{startup.description}</p>
           </div>
         </Link>
       </CardHeader>
@@ -66,20 +66,45 @@ export function StartupCard({ startup }: StartupCardProps) {
           ))}
         </div>
       </CardContent>
-      <CardFooter className="gap-2">
-        <Button asChild className="flex-1">
-          <Link href={`/startups/${startup.id}`}>
-            View Profile
-          </Link>
-        </Button>
-        {hasPermission("CLAIM_STARTUP") && (
-  <Button variant="outline" asChild>
-    <Link href={`/auth/register?claim=${startup.id}`}>
-      Claim Startup
-    </Link>
-  </Button>
-)}
+      <CardFooter className="border-t pt-4 flex flex-col items-start">
+        {/* Add stage information */}
+        <div className="w-full mb-4 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-muted-foreground">
+          {startup.startupStage && (
+            <div className="flex items-center gap-1">
+              <Circle className="h-3 w-3" />
+              Stage: {startup.startupStage}
+            </div>
+          )}
+          
+          {startup.investmentStage && (
+            <div className="flex items-center gap-1">
+              <Banknote className="h-3 w-3" />
+              Investment Stage: {startup.investmentStage}
+            </div>
+          )}
+          
+          {startup.fundingNeeds && (
+            <div className="flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" />
+              Funding Needs: {startup.fundingNeeds}
+            </div>
+          )}
+        </div>
         
+        <div className="w-full flex gap-2">
+          <Button asChild className="flex-1">
+            <Link href={`/startups/${startup.id}`}>
+              View Profile
+            </Link>
+          </Button>
+          {hasPermission("CLAIM_STARTUP") && (
+            <Button variant="outline" asChild>
+              <Link href={`/startups/${startup.id}/claim`}>
+                Claim Startup
+              </Link>
+            </Button>
+          )}
+        </div>
       </CardFooter>
     </Card>
   );

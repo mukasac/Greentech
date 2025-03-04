@@ -22,34 +22,6 @@ interface GalleryImage {
   [key: string]: any; // For any additional properties
 }
 
-// export async function GET(req: Request) {
-//   try {
-//     const { searchParams } = new URL(req.url);
-//     const category = searchParams.get("category");
-//     const region = searchParams.get("region");
-
-//     const where = {
-//       ...(category && { mainCategory: category }),
-//       ...(region && { country: region }),
-//     };
-
-//     const startups = await db.startup.findMany({
-//       where,
-//       include: {
-//         team: true,
-//         gallery: true,
-//       },
-//     });
-
-//     return NextResponse.json(startups);
-//   } catch (error) {
-//     return NextResponse.json(
-//       { error: "Failed to fetch startups" },
-//       { status: 500 }
-//     );
-//   }
-// }
-
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -57,13 +29,25 @@ export async function GET(req: Request) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const skip = (page - 1) * limit;
 
-    const category = searchParams.get("category");
+    const categoryId = searchParams.get("category");
     const region = searchParams.get("region");
 
-    const where = {
-      ...(category && { mainCategory: category }),
-      ...(region && { country: region }),
-    };
+    // Build the where clause
+    let where: any = {};
+    
+    // Handle category filtering through the relation
+    if (categoryId) {
+      where.categories = {
+        some: {
+          categoryId: parseInt(categoryId)
+        }
+      };
+    }
+    
+    // Handle region filtering
+    if (region) {
+      where.country = region;
+    }
 
     const totalCount = await db.startup.count({ where });
 
@@ -72,6 +56,11 @@ export async function GET(req: Request) {
       include: {
         team: true,
         gallery: true,
+        categories: {
+          include: {
+            category: true
+          }
+        }
       },
       skip,
       take: limit,
@@ -87,12 +76,14 @@ export async function GET(req: Request) {
       },
     });
   } catch (error) {
+    console.error("Error fetching startups:", error);
     return NextResponse.json(
       { error: "Failed to fetch startups" },
       { status: 500 }
     );
   }
 }
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -111,8 +102,13 @@ export async function POST(req: Request) {
       funding,
       teamMembers,
       galleryImages,
-      // mainCategory = "renewable-energy",
-      // subcategories = [],
+      // Stage fields with proper default values
+      startupStage = "",
+      investmentStage = "",
+      fundingNeeds = "",
+      stage = "",  // Legacy field for backward compatibility
+      mainCategory, // This will be handled separately for the category relation
+      subcategories = [],
       country = "norway", // Default to Norway if not provided
       tags = [],
     } = body;
@@ -134,13 +130,46 @@ export async function POST(req: Request) {
           funding,
           logo: body.logo || defaultLogo,
           profileImage: body.profileImage || defaultProfileImage,
-          // mainCategory,
-          // subcategories,
+          // Include stage fields explicitly
+          startupStage,
+          investmentStage, 
+          fundingNeeds,
+          stage,  // Legacy field
           country,
           tags,
           userId: session.user.id,
         },
       });
+
+      // Handle categories if mainCategory is provided
+      if (mainCategory) {
+        const mainCategoryId = typeof mainCategory === 'string' 
+          ? parseInt(mainCategory) 
+          : mainCategory;
+          
+        await tx.startupCategory.create({
+          data: {
+            startupId: startup.id,
+            categoryId: mainCategoryId
+          }
+        });
+      }
+      
+      // Handle subcategories if provided
+      if (subcategories && subcategories.length > 0) {
+        for (const subCat of subcategories) {
+          const categoryId = typeof subCat === 'string' 
+            ? parseInt(subCat) 
+            : subCat;
+            
+          await tx.startupCategory.create({
+            data: {
+              startupId: startup.id,
+              categoryId: categoryId
+            }
+          });
+        }
+      }
 
       // Create team members if they exist
       if (teamMembers?.length > 0) {
@@ -168,6 +197,11 @@ export async function POST(req: Request) {
         include: {
           team: true,
           gallery: true,
+          categories: {
+            include: {
+              category: true
+            }
+          }
         },
       });
 

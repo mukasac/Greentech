@@ -28,7 +28,7 @@ export function StartupProfileHeader({ startup }: StartupProfileHeaderProps) {
             {startup.name}
           </h1>
           <div className="flex gap-2">
-            {startup.tags.slice(0, 3).map((tag) => (
+            {startup.tags?.slice(0, 3).map((tag) => (
               <Badge key={tag} variant="secondary" className="shadow">
                 {tag}
               </Badge>

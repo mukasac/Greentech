@@ -66,6 +66,12 @@ model Startup {
   featured       Boolean   @default(false)
   sustainability Json?     // Store sustainability data as JSON
   viewCount      Int       @default(0)        // Track profile views
+  
+  // Add these new fields for startup stages
+  startupStage    String?
+  investmentStage String?
+  fundingNeeds    String?
+  
   userId         String?
   user           User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
   team           Team[]
@@ -79,7 +85,6 @@ model Startup {
   updatedAt      DateTime  @updatedAt
   regionId       String?
   region         Region?         @relation(fields: [regionId], references: [id])
-
 
   @@index([regionId])
 }
@@ -254,36 +259,22 @@ model AnalyticsEvent {
   createdAt DateTime @default(now())
 }
 
-// Updated ClimateImpact model with metrics JSON field
 model ClimateImpact {
   id                String   @id @default(cuid())
   isActive          Boolean  @default(true)
-  
-  // Original metrics fields for backward compatibility
   co2Reduction      Float?
   waterSaved        Float?
   energyEfficiency  Float?
   wasteDiverted     Float?
   biodiversityImpact String?  @db.Text
-  
-  // New field for storing all impact metrics as JSON
-  metrics           Json?
-  
-  // Carbon footprint fields
   carbonCaptured    Float?
   lifecycleCo2Reduction Float?
   offsetPrograms    String?  @db.Text
-  
-  // SDGs and certifications
   sdgs              Int[]
   sdgImpact         String?  @db.Text
   certifications    String[]
   awards            String?  @db.Text
-  
-  // Lifecycle data - expanded from original version
   lifecycle         Json?
-  
-  // Relations and timestamps
   startupId         String
   startup           Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
   createdAt         DateTime @default(now())
@@ -346,6 +337,8 @@ model EcosystemPartner {
   region    Region   @relation(fields: [regionId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([regionId])
 }
 
 model StartupCategory {

@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -15,7 +22,6 @@ import { TeamForm } from "./team-form";
 import { GalleryUpload } from "./gallery-upload";
 import { SustainabilityForm } from "./climate-impact-form";
 import { usePermissions } from "@/hooks/usePermissions";
-import { hasPermission } from "../../../lib/auth/utils";
 
 // Updated interface to match GalleryUpload component expectations
 interface GalleryImage {
@@ -40,6 +46,9 @@ export function StartupProfileForm() {
     funding: "",
     teamMembers: [] as any[],
     galleryImages: [] as GalleryImage[],
+    startupStage: "",
+    investmentStage: "",
+    fundingNeeds: "",
   });
 
   const handleChange = (
@@ -49,6 +58,13 @@ export function StartupProfileForm() {
     setFormData((prev) => ({
       ...prev,
       [id]: value,
+    }));
+  };
+
+  const handleSelectChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
     }));
   };
 
@@ -159,6 +175,7 @@ export function StartupProfileForm() {
         <Tabs defaultValue="basic" className="w-full">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
+            <TabsTrigger value="funding">Funding & Stages</TabsTrigger>
             {hasPermission("CREATE_STARTUP_CATEGORY") && (
               <TabsTrigger value="categories">Categories</TabsTrigger>
             )}
@@ -168,7 +185,6 @@ export function StartupProfileForm() {
             {hasPermission("CREATE_GALLERY") && (
               <TabsTrigger value="gallery">Gallery</TabsTrigger>
             )}
-            {/* <TabsTrigger value="sustainability">Sustainability</TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="basic">
@@ -242,6 +258,76 @@ export function StartupProfileForm() {
               </CardContent>
             </Card>
           </TabsContent>
+          
+          <TabsContent value="funding">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="startupStage">Startup Stage</Label>
+                      <Select
+                        value={formData.startupStage}
+                        onValueChange={(value) => handleSelectChange("startupStage", value)}
+                      >
+                        <SelectTrigger id="startupStage">
+                          <SelectValue placeholder="Select stage" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ideation">Ideation</SelectItem>
+                          <SelectItem value="mvp">MVP</SelectItem>
+                          <SelectItem value="beta">Beta</SelectItem>
+                          <SelectItem value="growth">Growth</SelectItem>
+                          <SelectItem value="scaling">Scaling</SelectItem>
+                          <SelectItem value="established">Established</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="investmentStage">Investment Stage</Label>
+                      <Select
+                        value={formData.investmentStage}
+                        onValueChange={(value) => handleSelectChange("investmentStage", value)}
+                      >
+                        <SelectTrigger id="investmentStage">
+                          <SelectValue placeholder="Select investment stage" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pre-seed">Pre-seed</SelectItem>
+                          <SelectItem value="seed">Seed</SelectItem>
+                          <SelectItem value="series-a">Series A</SelectItem>
+                          <SelectItem value="series-b">Series B</SelectItem>
+                          <SelectItem value="series-c">Series C</SelectItem>
+                          <SelectItem value="growth">Growth</SelectItem>
+                          <SelectItem value="ipo">IPO</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="fundingNeeds">Funding Needs</Label>
+                      <Select
+                        value={formData.fundingNeeds}
+                        onValueChange={(value) => handleSelectChange("fundingNeeds", value)}
+                      >
+                        <SelectTrigger id="fundingNeeds">
+                          <SelectValue placeholder="Select funding needs" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="not-raising">Not currently raising</SelectItem>
+                          <SelectItem value="looking">Actively looking</SelectItem>
+                          <SelectItem value="in-process">In funding process</SelectItem>
+                          <SelectItem value="closing">Closing round</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
           {hasPermission("CREATE_STARTUP_CATEGORY") && (
             <TabsContent value="categories">
               <CategorySelector />
@@ -253,15 +339,12 @@ export function StartupProfileForm() {
               <TeamForm onChange={handleTeamChange} />
             </TabsContent>
           )}
+          
           {hasPermission("CREATE_GALLERY") && (
             <TabsContent value="gallery">
               <GalleryUpload onChange={handleGalleryChange} />
             </TabsContent>
           )}
-
-          {/* <TabsContent value="sustainability">
-            <SustainabilityForm />
-          </TabsContent> */}
         </Tabs>
 
         <div className="flex justify-end space-x-4">

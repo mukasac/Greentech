@@ -11,6 +11,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowLeft, AlertCircle, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { Startup } from "@/lib/types/startup";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function EditStartupPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -29,15 +36,46 @@ export default function EditStartupPage({ params }: { params: { id: string } }) 
     mainCategory: "renewable-energy",
     country: "norway",
     tags: [],
+    startupStage: "",
+    investmentStage: "",
+    fundingNeeds: "",
   });
+
+  // Define options for dropdown selects
+  const startupStageOptions = [
+    { value: "MVP", label: "MVP" },
+    { value: "Prototype", label: "Prototype" },
+    { value: "Market Ready", label: "Market Ready" },
+    { value: "Scaling", label: "Scaling" },
+    { value: "Mature", label: "Mature" }
+  ];
+
+  const investmentStageOptions = [
+    { value: "Pre-seed", label: "Pre-seed" },
+    { value: "Seed", label: "Seed" },
+    { value: "Series A", label: "Series A" },
+    { value: "Series B", label: "Series B" },
+    { value: "Series C+", label: "Series C+" },
+    { value: "Growth", label: "Growth" }
+  ];
+
+  const fundingNeedsOptions = [
+    { value: "Looking for funding", label: "Looking for funding" },
+    { value: "Not currently raising", label: "Not currently raising" },
+    { value: "Self-funded", label: "Self-funded" },
+    { value: "Profitable", label: "Profitable" }
+  ];
 
   useEffect(() => {
     const fetchStartup = async () => {
       try {
+        setIsLoading(true);
         const response = await fetch(`/api/startups/${params.id}`);
+        
         if (!response.ok) {
           throw new Error("Failed to fetch startup");
         }
+        
         const data = await response.json();
         setFormData(data);
       } catch (error) {
@@ -196,6 +234,75 @@ export default function EditStartupPage({ params }: { params: { id: string } }) 
                     onChange={handleChange}
                     required
                   />
+                </div>
+              </div>
+
+              {/* Add Stage Fields Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Company Stage</h3>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="startupStage">Startup Stage</Label>
+                    <Select
+                      value={formData.startupStage || ""}
+                      onValueChange={(value) => 
+                        setFormData(prev => ({ ...prev, startupStage: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select startup stage" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {startupStageOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="investmentStage">Investment Stage</Label>
+                    <Select
+                      value={formData.investmentStage || ""}
+                      onValueChange={(value) => 
+                        setFormData(prev => ({ ...prev, investmentStage: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select investment stage" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {investmentStageOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fundingNeeds">Funding Needs</Label>
+                    <Select
+                      value={formData.fundingNeeds || ""}
+                      onValueChange={(value) => 
+                        setFormData(prev => ({ ...prev, fundingNeeds: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select funding needs" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fundingNeedsOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 

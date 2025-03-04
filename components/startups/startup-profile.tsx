@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { Startup } from "@/lib/types/startup";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Globe, Users, Building2, Banknote } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { StartupProfileHeader } from "./startup-profile-header";
 import { usePermissions } from "@/hooks/usePermissions";
 import Link from "next/link";
@@ -39,34 +38,6 @@ export function StartupProfile({ startup }: StartupProfileProps) {
         <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
           <main>
             <div className="space-y-8">
-              <section>
-                <h2 className="mb-4 text-2xl font-semibold">About</h2>
-                <p className="text-muted-foreground">{startup.description}</p>
-                
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    Founded {startup.founded}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4" />
-                    {startup.employees} employees
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Globe className="h-4 w-4" />
-                    {startup.country}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Building2 className="h-4 w-4" />
-                    {startup.mainCategory.replace("-", " ")}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Banknote className="h-4 w-4" />
-                    Funding: {startup.funding}
-                  </div>
-                </div>
-              </section>
-
               {/* Climate Impact Section */}
               <section>
                 <h2 className="mb-4 text-2xl font-semibold">Climate Impact</h2>
