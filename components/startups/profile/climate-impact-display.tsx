@@ -213,28 +213,36 @@ function MetricCard({
   const iconData = getMetricIcon(metricKey);
   
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg shadow p-4 border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
-      <div className="flex items-center gap-3">
-        <div className="rounded-full bg-emerald-100 dark:bg-emerald-900 p-2 flex-shrink-0">
+    <div className="bg-white dark:bg-slate-900 rounded-lg shadow p-3 sm:p-4 border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="rounded-full bg-emerald-100 dark:bg-emerald-900 p-1.5 sm:p-2 flex-shrink-0">
+          <ColoredIcon 
+            icon={iconData.icon} 
+            color={iconData.color} 
+            size={16} 
+            className="sm:hidden"
+          />
           <ColoredIcon 
             icon={iconData.icon} 
             color={iconData.color} 
             size={18} 
+            className="hidden sm:block"
           />
         </div>
         <div>
-          <div className="text-lg md:text-xl font-bold">
+          <div className="text-base sm:text-lg md:text-xl font-bold truncate">
             {typeof value === 'number' ? value.toLocaleString() : value}
             {unit ? ` ${unit}` : ''}
           </div>
-          <div className="text-sm text-muted-foreground">{label}</div>
+          <div className="text-xs sm:text-sm text-muted-foreground truncate">{label}</div>
         </div>
       </div>
     </div>
   );
 }
 
-// Helper function to safely convert a value to string or number type
+
+  // Helper function to safely convert a value to string or number type
 function normalizeValue(value: any): string | number | null | undefined {
   if (value === null || value === undefined) {
     return undefined;
@@ -527,374 +535,481 @@ export function ClimateImpactDisplay({ climateImpacts = [] }: ClimateImpactDispl
   });
 
   return (
-    <div className="space-y-8 p-4 md:p-6 lg:p-8 bg-gradient-to-b from-green-50 to-blue-50 dark:from-slate-900 dark:to-slate-950 rounded-xl">
-      {/* Header with badge showing total metrics */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <h2 className="text-2xl font-bold flex items-center">
-          <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
-            <ColoredIcon 
-              icon={defaultIcon.icon} 
-              color={defaultIcon.color}
-              size={24} 
-            />
-          </div>
-          Climate Impact
-        </h2>
-        {keyMetrics.length > 0 && (
-          <Badge variant="outline" className="text-xs px-2 py-1">
-            {keyMetrics.length} sustainability metrics
-          </Badge>
-        )}
-      </div>
-      
-      {/* Key Metrics Highlights */}
-      {keyMetrics.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {keyMetrics.slice(0, 8).map((metric) => (
-            <MetricCard
-              key={metric.key}
-              metricKey={metric.key}
-              value={normalizeValue(metric.value)}
-              label={metric.label}
-              unit={metric.unit}
-            />
-          ))}
+    <div className="flex justify-center items-center w-full mx-auto">
+      <div className="w-full max-w-6xl space-y-6 p-3 sm:p-4 md:p-6 lg:p-8 bg-gradient-to-b from-green-50 to-blue-50 dark:from-slate-900 dark:to-slate-950 rounded-xl">
+        {/* Header with badge showing total metrics */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold flex items-center">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
+              <ColoredIcon 
+                icon={defaultIcon.icon} 
+                color={defaultIcon.color}
+                size={20}
+                className="sm:hidden" 
+              />
+              <ColoredIcon 
+                icon={defaultIcon.icon} 
+                color={defaultIcon.color}
+                size={24}
+                className="hidden sm:block" 
+              />
+            </div>
+            Climate Impact
+          </h2>
+          {keyMetrics.length > 0 && (
+            <Badge variant="outline" className="text-xs px-2 py-1 self-start sm:self-auto">
+              {keyMetrics.length} sustainability metrics
+            </Badge>
+          )}
         </div>
-      )}
-      
-      {/* Biodiversity Impact (if available) */}
-      {getMetricValue('biodiversityImpact') && (
-        <Card className="overflow-hidden border-emerald-100 dark:border-emerald-900 shadow-md hover:shadow-lg transition-shadow">
-          <CardHeader className="pb-2 pt-4 bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-950/40 dark:to-blue-950/30">
-            <CardTitle className="text-lg flex items-center">
-              <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
-                <ColoredIcon 
-                  icon={getMetricIcon("biodiversityImpact").icon} 
-                  color={getMetricIcon("biodiversityImpact").color}
-                  size={18} 
-                />
-              </div>
-              Biodiversity Impact
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              {renderValue(getMetricValue('biodiversityImpact'))}
-            </p>
-          </CardContent>
-        </Card>
-      )}
+        
+        {/* Key Metrics Highlights */}
+        {keyMetrics.length > 0 && (
+          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+            {keyMetrics.slice(0, 8).map((metric) => (
+              <MetricCard
+                key={metric.key}
+                metricKey={metric.key}
+                value={normalizeValue(metric.value)}
+                label={metric.label}
+                unit={metric.unit}
+              />
+            ))}
+          </div>
+        )}
+        
+        {/* Biodiversity Impact (if available) */}
+        {getMetricValue('biodiversityImpact') && (
+          <Card className="overflow-hidden border-emerald-100 dark:border-emerald-900 shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-2 pt-4 bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-950/40 dark:to-blue-950/30">
+              <CardTitle className="text-base sm:text-lg flex items-center">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
+                  <ColoredIcon 
+                    icon={getMetricIcon("biodiversityImpact").icon} 
+                    color={getMetricIcon("biodiversityImpact").color}
+                    size={14}
+                    className="sm:hidden" 
+                  />
+                  <ColoredIcon 
+                    icon={getMetricIcon("biodiversityImpact").icon} 
+                    color={getMetricIcon("biodiversityImpact").color}
+                    size={18}
+                    className="hidden sm:block" 
+                  />
+                </div>
+                Biodiversity Impact
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                {renderValue(getMetricValue('biodiversityImpact'))}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* SDGs Section */}
-      {impact.sdgs && impact.sdgs.length > 0 && impact.sdgs.some(sdg => sdg !== null && sdg !== undefined && sdg !== "") && (
-        <Card className="overflow-hidden border-emerald-100 dark:border-emerald-900 shadow-md hover:shadow-lg transition-shadow">
-          <CardHeader className="pb-0 pt-4 bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-950/40 dark:to-blue-950/30">
-            <CardTitle className="text-lg flex items-center">
-              <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
-                <ColoredIcon 
-                  icon={certificationIcon.icon} 
-                  color={certificationIcon.color}
-                  size={18} 
-                />
-              </div>
-              UN Sustainable Development Goals
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4">
-            <div className="flex flex-wrap gap-2">
-              {impact.sdgs.filter(sdg => sdg !== null && sdg !== undefined && sdg !== "").map((sdg) => (
-                <Badge key={sdg} variant="outline" className="flex items-center text-sm p-2">
+        {/* SDGs Section */}
+        {impact.sdgs && impact.sdgs.length > 0 && impact.sdgs.some(sdg => sdg !== null && sdg !== undefined && sdg !== "") && (
+          <Card className="overflow-hidden border-emerald-100 dark:border-emerald-900 shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-0 pt-3 sm:pt-4 bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-950/40 dark:to-blue-950/30">
+              <CardTitle className="text-base sm:text-lg flex items-center">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
                   <ColoredIcon 
                     icon={certificationIcon.icon} 
-                    color={certificationIcon.color} 
-                    className="mr-1" 
-                    size={12} 
+                    color={certificationIcon.color}
+                    size={14}
+                    className="sm:hidden"
                   />
-                  SDG {sdg}
-                </Badge>
-              ))}
-            </div>
-            {impact.sdgImpact && impact.sdgImpact !== "" && (
-              <p className="mt-4 text-muted-foreground">
-                {renderValue(impact.sdgImpact)}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Certifications & Awards */}
-      {((impact.certifications && impact.certifications.length > 0 && impact.certifications.some(cert => cert !== null && cert !== undefined && cert !== "")) || 
-        (impact.awards && impact.awards !== "" && impact.awards !== null && impact.awards !== undefined)) && (
-        <Card className="overflow-hidden border-emerald-100 dark:border-emerald-900 shadow-md hover:shadow-lg transition-shadow">
-          <CardHeader className="pb-0 pt-4 bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-950/40 dark:to-blue-950/30">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
-                <ColoredIcon 
-                  icon={certificationIcon.icon} 
-                  color={certificationIcon.color}
-                  size={18} 
-                />
-              </div>
-              Certifications & Awards
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4">
-            {impact.certifications && impact.certifications.length > 0 && impact.certifications.some(cert => cert !== null && cert !== undefined && cert !== "") && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {impact.certifications.filter(cert => cert !== null && cert !== undefined && cert !== "").map((cert) => (
-                  <Badge key={cert} variant="secondary" className="flex items-center p-2">
+                  <ColoredIcon 
+                    icon={certificationIcon.icon} 
+                    color={certificationIcon.color}
+                    size={18}
+                    className="hidden sm:block" 
+                  />
+                </div>
+                UN Sustainable Development Goals
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-3 sm:pt-4">
+              <div className="flex flex-wrap gap-1 sm:gap-2">
+                {impact.sdgs.filter(sdg => sdg !== null && sdg !== undefined && sdg !== "").map((sdg) => (
+                  <Badge key={sdg} variant="outline" className="flex items-center text-xs sm:text-sm p-1 sm:p-2">
                     <ColoredIcon 
                       icon={certificationIcon.icon} 
                       color={certificationIcon.color} 
                       className="mr-1" 
-                      size={12} 
+                      size={10}
                     />
-                    {cert}
+                    SDG {sdg}
                   </Badge>
                 ))}
               </div>
-            )}
-            {impact.awards && impact.awards !== "" && (
-              <p className="text-muted-foreground">
-                {renderValue(impact.awards)}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      )}
+              {impact.sdgImpact && impact.sdgImpact !== "" && (
+                <p className="mt-3 sm:mt-4 text-sm sm:text-base text-muted-foreground">
+                  {renderValue(impact.sdgImpact)}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Grouped Impact Metrics */}
-      {Object.keys(groupedImpactMetrics).length > 0 && (
-        <div className="space-y-8">
-          <h3 className="text-xl font-semibold border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center">
-            <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
-              <ColoredIcon 
-                icon={getMetricIcon("co2Reduction").icon} 
-                color={getMetricIcon("co2Reduction").color}
-                size={20} 
-              />
-            </div>
-            Impact Metrics
-          </h3>
-          
-          {Object.entries(groupedImpactMetrics).map(([categoryKey, categoryData]) => {
-            const categoryIconData = getCategoryIcon(categoryKey, "metrics");
-            
-            return (
-              <div key={categoryKey} className="space-y-4">
-                <h4 className="text-lg font-medium flex items-center">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
-                    <ColoredIcon 
-                      icon={categoryIconData.icon} 
-                      color={categoryIconData.color}
-                      size={18} 
-                    />
-                  </div>
-                  {categoryData.label}
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {categoryData.metrics.map((metric) => (
-                    <div key={metric.key} className="bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow transition-all">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="rounded-full bg-emerald-100 dark:bg-emerald-900 p-1.5 flex items-center justify-center">
-                          <ColoredIcon 
-                            icon={getMetricIcon(metric.key).icon} 
-                            color={getMetricIcon(metric.key).color} 
-                            size={14} 
-                          />
-                        </div>
-                        <div className="font-medium text-sm">{metric.label}</div>
-                      </div>
-                      <div className="text-lg font-semibold">
-                        {typeof metric.value === 'number' ? metric.value.toLocaleString() : renderValue(metric.value)}
-                        {metric.unit ? ` ${metric.unit}` : ''}
-                      </div>
-                    </div>
+        {/* Certifications & Awards */}
+        {((impact.certifications && impact.certifications.length > 0 && impact.certifications.some(cert => cert !== null && cert !== undefined && cert !== "")) || 
+          (impact.awards && impact.awards !== "" && impact.awards !== null && impact.awards !== undefined)) && (
+          <Card className="overflow-hidden border-emerald-100 dark:border-emerald-900 shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-0 pt-3 sm:pt-4 bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-950/40 dark:to-blue-950/30">
+              <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
+                  <ColoredIcon 
+                    icon={certificationIcon.icon} 
+                    color={certificationIcon.color}
+                    size={14}
+                    className="sm:hidden" 
+                  />
+                  <ColoredIcon 
+                    icon={certificationIcon.icon} 
+                    color={certificationIcon.color}
+                    size={18}
+                    className="hidden sm:block" 
+                  />
+                </div>
+                Certifications & Awards
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-3 sm:pt-4">
+              {impact.certifications && impact.certifications.length > 0 && impact.certifications.some(cert => cert !== null && cert !== undefined && cert !== "") && (
+                <div className="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4">
+                  {impact.certifications.filter(cert => cert !== null && cert !== undefined && cert !== "").map((cert) => (
+                    <Badge key={cert} variant="secondary" className="flex items-center text-xs sm:text-sm p-1 sm:p-2">
+                      <ColoredIcon 
+                        icon={certificationIcon.icon} 
+                        color={certificationIcon.color} 
+                        className="mr-1" 
+                        size={10}
+                      />
+                      <span className="truncate max-w-[150px] sm:max-w-full">{cert}</span>
+                    </Badge>
                   ))}
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              )}
+              {impact.awards && impact.awards !== "" && (
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  {renderValue(impact.awards)}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Grouped Lifecycle Metrics */}
-      {Object.keys(groupedLifecycleMetrics).length > 0 && (
-        <div className="space-y-8">
-          <h3 className="text-xl font-semibold border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center">
-            <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
-              <ColoredIcon 
-                icon={getMetricIcon("circularity").icon} 
-                color={getMetricIcon("circularity").color}
-                size={20} 
-              />
-            </div>
-            Lifecycle Impacts
-          </h3>
-          
-          {Object.entries(groupedLifecycleMetrics).map(([categoryKey, categoryData]) => {
-            const categoryIconData = getCategoryIcon(categoryKey, "lifecycle");
+        {/* Grouped Impact Metrics */}
+        {Object.keys(groupedImpactMetrics).length > 0 && (
+          <div className="space-y-6">
+            <h3 className="text-lg sm:text-xl font-semibold border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
+                <ColoredIcon 
+                  icon={getMetricIcon("co2Reduction").icon} 
+                  color={getMetricIcon("co2Reduction").color}
+                  size={16}
+                  className="sm:hidden" 
+                />
+                <ColoredIcon 
+                  icon={getMetricIcon("co2Reduction").icon} 
+                  color={getMetricIcon("co2Reduction").color}
+                  size={20}
+                  className="hidden sm:block" 
+                />
+              </div>
+              Impact Metrics
+            </h3>
             
-            // Special case for description
-            if (categoryKey === "assessment-documentation" && 
-                categoryData.metrics.length === 1 && 
-                categoryData.metrics[0].key === "description") {
+            {Object.entries(groupedImpactMetrics).map(([categoryKey, categoryData]) => {
+              const categoryIconData = getCategoryIcon(categoryKey, "metrics");
+              
               return (
-                <div key={categoryKey} className="space-y-4">
-                  <h4 className="text-lg font-medium flex items-center">
-                    <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
+                <div key={categoryKey} className="space-y-3 sm:space-y-4">
+                  <h4 className="text-base sm:text-lg font-medium flex items-center">
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
                       <ColoredIcon 
                         icon={categoryIconData.icon} 
                         color={categoryIconData.color}
-                        size={18} 
+                        size={14}
+                        className="sm:hidden"
+                      />
+                      <ColoredIcon 
+                        icon={categoryIconData.icon} 
+                        color={categoryIconData.color}
+                        size={18}
+                        className="hidden sm:block"
                       />
                     </div>
-                    Lifecycle Description
+                    {categoryData.label}
                   </h4>
-                  <Card className="border-emerald-100 dark:border-emerald-900 shadow-sm">
-                    <CardContent className="pt-6">
-                      <p>{renderValue(categoryData.metrics[0].value)}</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              );
-            }
-            
-            return (
-              <div key={categoryKey} className="space-y-4">
-                <h4 className="text-lg font-medium flex items-center">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
-                    <ColoredIcon 
-                      icon={categoryIconData.icon} 
-                      color={categoryIconData.color}
-                      size={18} 
-                    />
-                  </div>
-                  {categoryData.label}
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {categoryData.metrics
-                    .filter(metric => metric.key !== "description")
-                    .map((metric) => (
-                      <div key={metric.key} className="bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow transition-all">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="rounded-full bg-emerald-100 dark:bg-emerald-900 p-1.5 flex items-center justify-center">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    {categoryData.metrics.map((metric) => (
+                      <div key={metric.key} className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow transition-all">
+                        <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                          <div className="rounded-full bg-emerald-100 dark:bg-emerald-900 p-1 sm:p-1.5 flex items-center justify-center">
                             <ColoredIcon 
                               icon={getMetricIcon(metric.key).icon} 
                               color={getMetricIcon(metric.key).color} 
-                              size={14} 
+                              size={12}
+                              className="sm:hidden"
+                            />
+                            <ColoredIcon 
+                              icon={getMetricIcon(metric.key).icon} 
+                              color={getMetricIcon(metric.key).color} 
+                              size={14}
+                              className="hidden sm:block"
                             />
                           </div>
-                          <div className="font-medium text-sm">{metric.label}</div>
+                          <div className="font-medium text-xs sm:text-sm">{metric.label}</div>
                         </div>
-                        <div className="text-lg font-semibold">
+                        <div className="text-base sm:text-lg font-semibold truncate">
                           {typeof metric.value === 'number' ? metric.value.toLocaleString() : renderValue(metric.value)}
                           {metric.unit ? ` ${metric.unit}` : ''}
                         </div>
                       </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
 
-      {/* Carbon Footprint & Offsets Section */}
-      {(
-        (impact.carbonCaptured !== undefined && impact.carbonCaptured !== null && 
-         ((typeof impact.carbonCaptured === 'number' && impact.carbonCaptured !== 0) || 
-          (typeof impact.carbonCaptured === 'string' && impact.carbonCaptured !== "" && impact.carbonCaptured !== "0"))) || 
-        (impact.lifecycleCo2Reduction !== undefined && impact.lifecycleCo2Reduction !== null && 
-         ((typeof impact.lifecycleCo2Reduction === 'number' && impact.lifecycleCo2Reduction !== 0) || 
-          (typeof impact.lifecycleCo2Reduction === 'string' && impact.lifecycleCo2Reduction !== "" && impact.lifecycleCo2Reduction !== "0"))) || 
-        (impact.offsetPrograms && typeof impact.offsetPrograms === 'string' && impact.offsetPrograms.trim() !== "")
-      ) ? (
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center">
-            <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
-              <ColoredIcon 
-                icon={getMetricIcon("carbonCaptured").icon} 
-                color={getMetricIcon("carbonCaptured").color}
-                size={20} 
-              />
-            </div>
-            Carbon Footprint & Offsets
-          </h3>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {impact.carbonCaptured !== undefined && impact.carbonCaptured !== null && 
-             ((typeof impact.carbonCaptured === 'number' && impact.carbonCaptured !== 0) || 
-              (typeof impact.carbonCaptured === 'string' && impact.carbonCaptured !== "" && impact.carbonCaptured !== "0")) && (
-              <div className="bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-emerald-100 dark:bg-emerald-900 p-2 flex items-center justify-center">
-                    <ColoredIcon 
-                      icon={getMetricIcon("carbonCaptured").icon} 
-                      color={getMetricIcon("carbonCaptured").color} 
-                      size={16} 
-                    />
-                  </div>
-                  <div>
-                    <div className="text-lg font-semibold">
-                      {typeof impact.carbonCaptured === 'number' ? 
-                        impact.carbonCaptured.toLocaleString() : 
-                        renderValue(impact.carbonCaptured)} tons/year
-                    </div>
-                    <div className="text-sm text-muted-foreground">Carbon Captured</div>
-                  </div>
-                </div>
+        {/* Grouped Lifecycle Metrics */}
+        {Object.keys(groupedLifecycleMetrics).length > 0 && (
+          <div className="space-y-6">
+            <h3 className="text-lg sm:text-xl font-semibold border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
+                <ColoredIcon 
+                  icon={getMetricIcon("circularity").icon} 
+                  color={getMetricIcon("circularity").color}
+                  size={16}
+                  className="sm:hidden"
+                />
+                <ColoredIcon 
+                  icon={getMetricIcon("circularity").icon} 
+                  color={getMetricIcon("circularity").color}
+                  size={20}
+                  className="hidden sm:block"
+                />
               </div>
-            )}
+              Lifecycle Impacts
+            </h3>
             
-            {impact.lifecycleCo2Reduction !== undefined && impact.lifecycleCo2Reduction !== null && 
-             ((typeof impact.lifecycleCo2Reduction === 'number' && impact.lifecycleCo2Reduction !== 0) || 
-              (typeof impact.lifecycleCo2Reduction === 'string' && impact.lifecycleCo2Reduction !== "" && impact.lifecycleCo2Reduction !== "0")) && (
-              <div className="bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-emerald-100 dark:bg-emerald-900 p-2 flex items-center justify-center">
-                    <ColoredIcon 
-                      icon={getMetricIcon("lifecycleCo2Reduction").icon} 
-                      color={getMetricIcon("lifecycleCo2Reduction").color} 
-                      size={16} 
-                    />
+            {Object.entries(groupedLifecycleMetrics).map(([categoryKey, categoryData]) => {
+              const categoryIconData = getCategoryIcon(categoryKey, "lifecycle");
+              
+              // Special case for description
+              if (categoryKey === "assessment-documentation" && 
+                  categoryData.metrics.length === 1 && 
+                  categoryData.metrics[0].key === "description") {
+                return (
+                  <div key={categoryKey} className="space-y-3 sm:space-y-4">
+                    <h4 className="text-base sm:text-lg font-medium flex items-center">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
+                        <ColoredIcon 
+                          icon={categoryIconData.icon} 
+                          color={categoryIconData.color}
+                          size={14}
+                          className="sm:hidden"
+                        />
+                        <ColoredIcon 
+                          icon={categoryIconData.icon} 
+                          color={categoryIconData.color}
+                          size={18}
+                          className="hidden sm:block"
+                        />
+                      </div>
+                      Lifecycle Description
+                    </h4>
+                    <Card className="border-emerald-100 dark:border-emerald-900 shadow-sm">
+                      <CardContent className="pt-4 sm:pt-6">
+                        <p className="text-sm sm:text-base">{renderValue(categoryData.metrics[0].value)}</p>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div>
-                    <div className="text-lg font-semibold">
-                      {typeof impact.lifecycleCo2Reduction === 'number' ? 
-                        impact.lifecycleCo2Reduction : 
-                        renderValue(impact.lifecycleCo2Reduction)}%
+                );
+              }
+              
+              return (
+                <div key={categoryKey} className="space-y-3 sm:space-y-4">
+                  <h4 className="text-base sm:text-lg font-medium flex items-center">
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
+                      <ColoredIcon 
+                        icon={categoryIconData.icon} 
+                        color={categoryIconData.color}
+                        size={14}
+                        className="sm:hidden"
+                      />
+                      <ColoredIcon 
+                        icon={categoryIconData.icon} 
+                        color={categoryIconData.color}
+                        size={18}
+                        className="hidden sm:block"
+                      />
                     </div>
-                    <div className="text-sm text-muted-foreground">Lifecycle CO₂ Reduction</div>
+                    {categoryData.label}
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    {categoryData.metrics
+                      .filter(metric => metric.key !== "description")
+                      .map((metric) => (
+                        <div key={metric.key} className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow transition-all">
+                          <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                            <div className="rounded-full bg-emerald-100 dark:bg-emerald-900 p-1 sm:p-1.5 flex items-center justify-center">
+                              <ColoredIcon 
+                                icon={getMetricIcon(metric.key).icon} 
+                                color={getMetricIcon(metric.key).color} 
+                                size={12}
+                                className="sm:hidden"
+                              />
+                              <ColoredIcon 
+                                icon={getMetricIcon(metric.key).icon} 
+                                color={getMetricIcon(metric.key).color} 
+                                size={14}
+                                className="hidden sm:block"
+                              />
+                            </div>
+                            <div className="font-medium text-xs sm:text-sm">{metric.label}</div>
+                          </div>
+                          <div className="text-base sm:text-lg font-semibold truncate">
+                            {typeof metric.value === 'number' ? metric.value.toLocaleString() : renderValue(metric.value)}
+                            {metric.unit ? ` ${metric.unit}` : ''}
+                          </div>
+                        </div>
+                    ))}
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Carbon Footprint & Offsets Section */}
+        {(
+          (impact.carbonCaptured !== undefined && impact.carbonCaptured !== null && 
+           ((typeof impact.carbonCaptured === 'number' && impact.carbonCaptured !== 0) || 
+            (typeof impact.carbonCaptured === 'string' && impact.carbonCaptured !== "" && impact.carbonCaptured !== "0"))) || 
+          (impact.lifecycleCo2Reduction !== undefined && impact.lifecycleCo2Reduction !== null && 
+           ((typeof impact.lifecycleCo2Reduction === 'number' && impact.lifecycleCo2Reduction !== 0) || 
+            (typeof impact.lifecycleCo2Reduction === 'string' && impact.lifecycleCo2Reduction !== "" && impact.lifecycleCo2Reduction !== "0"))) || 
+          (impact.offsetPrograms && typeof impact.offsetPrograms === 'string' && impact.offsetPrograms.trim() !== "")
+        ) ? (
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-lg sm:text-xl font-semibold border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
+                <ColoredIcon 
+                  icon={getMetricIcon("carbonCaptured").icon} 
+                  color={getMetricIcon("carbonCaptured").color}
+                  size={16}
+                  className="sm:hidden"
+                />
+                <ColoredIcon 
+                  icon={getMetricIcon("carbonCaptured").icon} 
+                  color={getMetricIcon("carbonCaptured").color}
+                  size={20}
+                  className="hidden sm:block"
+                />
               </div>
+              Carbon Footprint & Offsets
+            </h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {impact.carbonCaptured !== undefined && impact.carbonCaptured !== null && 
+               ((typeof impact.carbonCaptured === 'number' && impact.carbonCaptured !== 0) || 
+                (typeof impact.carbonCaptured === 'string' && impact.carbonCaptured !== "" && impact.carbonCaptured !== "0")) && (
+                <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="rounded-full bg-emerald-100 dark:bg-emerald-900 p-1.5 sm:p-2 flex items-center justify-center">
+                      <ColoredIcon 
+                        icon={getMetricIcon("carbonCaptured").icon} 
+                        color={getMetricIcon("carbonCaptured").color} 
+                        size={14}
+                        className="sm:hidden"
+                      />
+                      <ColoredIcon 
+                        icon={getMetricIcon("carbonCaptured").icon} 
+                        color={getMetricIcon("carbonCaptured").color} 
+                        size={16}
+                        className="hidden sm:block"
+                      />
+                    </div>
+                    <div>
+                      <div className="text-base sm:text-lg font-semibold truncate">
+                        {typeof impact.carbonCaptured === 'number' ? 
+                          impact.carbonCaptured.toLocaleString() : 
+                          renderValue(impact.carbonCaptured)} tons/year
+                      </div>
+                      <div className="text-xs sm:text-sm text-muted-foreground">Carbon Captured</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {impact.lifecycleCo2Reduction !== undefined && impact.lifecycleCo2Reduction !== null && 
+               ((typeof impact.lifecycleCo2Reduction === 'number' && impact.lifecycleCo2Reduction !== 0) || 
+                (typeof impact.lifecycleCo2Reduction === 'string' && impact.lifecycleCo2Reduction !== "" && impact.lifecycleCo2Reduction !== "0")) && (
+                <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="rounded-full bg-emerald-100 dark:bg-emerald-900 p-1.5 sm:p-2 flex items-center justify-center">
+                      <ColoredIcon 
+                        icon={getMetricIcon("lifecycleCo2Reduction").icon} 
+                        color={getMetricIcon("lifecycleCo2Reduction").color} 
+                        size={14}
+                        className="sm:hidden"
+                      />
+                      <ColoredIcon 
+                        icon={getMetricIcon("lifecycleCo2Reduction").icon} 
+                        color={getMetricIcon("lifecycleCo2Reduction").color} 
+                        size={16}
+                        className="hidden sm:block"
+                      />
+                    </div>
+                    <div>
+                      <div className="text-base sm:text-lg font-semibold truncate">
+                        {typeof impact.lifecycleCo2Reduction === 'number' ? 
+                          impact.lifecycleCo2Reduction : 
+                          renderValue(impact.lifecycleCo2Reduction)}%
+                      </div>
+                      <div className="text-xs sm:text-sm text-muted-foreground">Lifecycle CO₂ Reduction</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {impact.offsetPrograms && typeof impact.offsetPrograms === 'string' && impact.offsetPrograms.trim() !== "" && (
+              <Card className="border-emerald-100 dark:border-emerald-900 shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+                <CardContent className="pt-4 sm:pt-6">
+                  <h4 className="font-medium mb-2 flex items-center text-sm sm:text-base">
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
+                      <ColoredIcon 
+                        icon={getMetricIcon("carbonCaptured").icon} 
+                        color={getMetricIcon("carbonCaptured").color} 
+                        size={14}
+                        className="sm:hidden"
+                      />
+                      <ColoredIcon 
+                        icon={getMetricIcon("carbonCaptured").icon} 
+                        color={getMetricIcon("carbonCaptured").color} 
+                        size={16}
+                        className="hidden sm:block"
+                      />
+                    </div>
+                    Offset Programs
+                  </h4>
+                  <p className="text-sm sm:text-base text-muted-foreground">{renderValue(impact.offsetPrograms)}</p>
+                </CardContent>
+              </Card>
             )}
           </div>
-          
-          {impact.offsetPrograms && typeof impact.offsetPrograms === 'string' && impact.offsetPrograms.trim() !== "" && (
-            <Card className="border-emerald-100 dark:border-emerald-900 shadow-md hover:shadow-lg transition-shadow overflow-hidden">
-              <CardContent className="pt-6">
-                <h4 className="font-medium mb-2 flex items-center">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center mr-2">
-                    <ColoredIcon 
-                      icon={getMetricIcon("carbonCaptured").icon} 
-                      color={getMetricIcon("carbonCaptured").color} 
-                      size={16} 
-                    />
-                  </div>
-                  Offset Programs
-                </h4>
-                <p className="text-muted-foreground">{renderValue(impact.offsetPrograms)}</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      ) : null}
-      
-      {/* Mobile-friendly bottom padding */}
-      <div className="h-6 sm:h-8 md:h-10"></div>
+        ) : null}
+        
+        {/* Mobile-friendly bottom padding */}
+        <div className="h-4 sm:h-6 md:h-8"></div>
+      </div>
     </div>
   );
 }

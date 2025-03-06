@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowLeft, AlertCircle, CheckCircle } from "lucide-react";
 import Link from "next/link";
@@ -25,13 +24,12 @@ export function AddTeamMemberForm({ startupId }: AddTeamMemberFormProps) {
     name: "",
     role: "",
     image: "",
-    bio: "",
     linkedin: "",
     twitter: "",
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { id, value } = e.target;
     setFormData(prev => ({
@@ -146,17 +144,6 @@ export function AddTeamMemberForm({ startupId }: AddTeamMemberFormProps) {
                     />
                   </div>
                 )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea
-                  id="bio"
-                  value={formData.bio}
-                  onChange={handleChange}
-                  rows={4}
-                  placeholder="Brief description about the team member"
-                />
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">

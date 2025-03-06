@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Globe, Users, Circle, Banknote, TrendingUp } from "lucide-react";
+import { Calendar, Globe } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -26,86 +26,68 @@ export function StartupCard({ startup }: StartupCardProps) {
   if (!startup) return null;
 
   return (
-    <Card className="flex h-full flex-col">
-      <CardHeader>
-        <Link href={`/startups/${startup.id}`}>
-          <div className="aspect-video overflow-hidden rounded-md relative">
-            <Image
-              src={startup.logo || DEFAULT_LOGO}
-              alt={startup.name || "Startup logo"}
-              fill
-              className="object-cover transition-transform duration-300 hover:scale-105"
-            />
-          </div>
-          <div className="mt-4">
-            <h3 className="text-xl font-semibold hover:text-primary">{startup.name}</h3>
-            <p className="text-sm text-muted-foreground">{startup.description}</p>
-          </div>
-        </Link>
-      </CardHeader>
-      <CardContent className="flex-1">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            Founded {startup.founded}
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Users className="h-4 w-4" />
-            {startup.employees} employees
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Globe className="h-4 w-4" />
-            {startup.country}
-          </div>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {startup.tags?.slice(0, 3).map((tag, index) => (
-            <Badge key={`${tag}-${index}`} variant="secondary">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-      </CardContent>
-      <CardFooter className="border-t pt-4 flex flex-col items-start">
-        {/* Add stage information */}
-        <div className="w-full mb-4 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-muted-foreground">
-          {startup.startupStage && (
-            <div className="flex items-center gap-1">
-              <Circle className="h-3 w-3" />
-              Stage: {startup.startupStage}
+    <Link href={`/startups/${startup.id}`} className="block h-full w-full max-w-[95%] mx-auto sm:max-w-full group">
+      <Card className="flex h-full flex-col transition-shadow hover:shadow-md">
+        <CardHeader className="pb-3 sm:pb-4">
+          <div className="flex flex-col items-center">
+            <div className="h-24 sm:h-28 md:h-32 w-full overflow-hidden rounded-md relative">
+              <Image
+                src={startup.logo || DEFAULT_LOGO}
+                alt={startup.name || "Startup logo"}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                className="object-contain transition-transform duration-300 group-hover:scale-105"
+              />
             </div>
-          )}
+            <div className="mt-3 sm:mt-4 text-center w-full">
+              <h3 className="text-lg sm:text-xl font-semibold group-hover:text-primary line-clamp-1">{startup.name}</h3>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="flex-1 pb-2 px-3 sm:px-4">
+          {/* Main stats one per line */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="truncate">Founded {startup.founded}</span>
+            </div>
+            <div className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+              <Globe className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="truncate">{startup.country}</span>
+            </div>
+          </div>
           
-          {startup.investmentStage && (
-            <div className="flex items-center gap-1">
-              <Banknote className="h-3 w-3" />
-              Investment Stage: {startup.investmentStage}
-            </div>
-          )}
-          
-          {startup.fundingNeeds && (
-            <div className="flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" />
-              Funding Needs: {startup.fundingNeeds}
-            </div>
-          )}
-        </div>
-        
-        <div className="w-full flex gap-2">
-          <Button asChild className="flex-1">
-            <Link href={`/startups/${startup.id}`}>
-              View Profile
-            </Link>
-          </Button>
-          {hasPermission("CLAIM_STARTUP") && (
-            <Button variant="outline" asChild>
-              <Link href={`/startups/${startup.id}/claim`}>
+          <div className="mt-3 sm:mt-4 flex flex-wrap justify-center gap-1 sm:gap-2">
+            {startup.tags?.slice(0, 3).map((tag, index) => (
+              <Badge 
+                key={`${tag}-${index}`}
+                variant="secondary"
+                className="text-xs px-2 py-0.5"
+              >
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        </CardContent>
+        <CardFooter className="border-t pt-3 sm:pt-4 flex flex-col items-center px-3 sm:px-4">
+          <div className="w-full flex justify-center gap-2">
+            {hasPermission("CLAIM_STARTUP") && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-3/4 sm:w-auto text-xs sm:text-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  window.location.href = `/startups/${startup.id}/claim`;
+                }}
+              >
                 Claim Startup
-              </Link>
-            </Button>
-          )}
-        </div>
-      </CardFooter>
-    </Card>
+              </Button>
+            )}
+          </div>
+        </CardFooter>
+      </Card>
+    </Link>
   );
 }

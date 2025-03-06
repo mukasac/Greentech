@@ -7,10 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { usePermissions } from "@/hooks/usePermissions";
 
 export function EventsList() {
-  const { hasPermission } = usePermissions();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,13 +59,13 @@ export function EventsList() {
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-4 sm:gap-6">
       {events.map((event) => (
-        <Card key={event.id}>
-          <CardContent className="p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <Card key={event.id} className="overflow-hidden">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col gap-4">
               <div>
-                <div className="mb-2 flex items-center gap-2">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
                   <Badge>{event.type}</Badge>
                   {event.tags.slice(0, 2).map((tag) => (
                     <Badge key={tag} variant="secondary">
@@ -75,39 +73,37 @@ export function EventsList() {
                     </Badge>
                   ))}
                 </div>
-                <h3 className="text-xl font-semibold">{event.title}</h3>
-                <p className="mt-1 text-muted-foreground">
-                  {event.description.substring(0, 120)}
-                  {event.description.length > 120 ? '...' : ''}
+                <h3 className="text-lg sm:text-xl font-semibold">{event.title}</h3>
+                <p className="mt-1 text-sm sm:text-base text-muted-foreground line-clamp-2 sm:line-clamp-3">
+                  {event.description}
                 </p>
               </div>
 
-              <div className="flex flex-col items-start gap-4 md:items-end">
-                <div className="space-y-1 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>{new Date(event.date).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>{event.location}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    {event.maxAttendees ? (
-                      <span>
-                        {event.attendees} / {event.maxAttendees} attendees
-                      </span>
-                    ) : (
-                      <span>{event.attendees} attendees</span>
-                    )}
-                  </div>
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap text-sm">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{new Date(event.date).toLocaleDateString()}</span>
                 </div>
-                {hasPermission("REGISTER_FOR_EVENT") && (
-                  <Button asChild>
-                    <Link href={`/events/${event.slug}`}>Register Now</Link>
-                  </Button>
-                )}
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{event.location}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 flex-shrink-0" />
+                  {event.maxAttendees ? (
+                    <span className="truncate">
+                      {event.attendees} / {event.maxAttendees} attendees
+                    </span>
+                  ) : (
+                    <span className="truncate">{event.attendees} attendees</span>
+                  )}
+                </div>
+              </div>
+              
+              <div className="mt-2">
+                <Button asChild className="w-full sm:w-auto">
+                  <Link href={`/events/${event.slug}`}>Register Now</Link>
+                </Button>
               </div>
             </div>
           </CardContent>

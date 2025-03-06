@@ -1,10 +1,8 @@
 "use client";
 
 import { Startup, TeamMember } from "@/lib/types/startup";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { LinkedinIcon, TwitterIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { TwitterIcon } from "lucide-react";
 
 interface StartupTeamProps {
   startup: Startup;
@@ -32,91 +30,63 @@ export function StartupTeam({ startup }: StartupTeamProps) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {leadership.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Leadership Team</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {leadership.map((member: TeamMember) => (
-                <div key={member.id} className="flex items-start gap-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={member.image} alt={member.name} />
-                    <AvatarFallback>{member.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h4 className="font-semibold">{member.name}</h4>
-                    <p className="text-sm text-muted-foreground">{member.role}</p>
-                    {member.bio && (
-                      <p className="mt-1 text-sm text-muted-foreground">{member.bio}</p>
-                    )}
-                    <div className="mt-2 flex gap-2">
-                      {member.linkedin && (
-                        <Button variant="ghost" size="icon" asChild>
-                          <a href={member.linkedin} target="_blank" rel="noopener noreferrer">
-                            <LinkedinIcon className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      )}
-                      {member.twitter && (
-                        <Button variant="ghost" size="icon" asChild>
-                          <a href={member.twitter} target="_blank" rel="noopener noreferrer">
-                            <TwitterIcon className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      )}
+        <div>
+          <h2 className="text-3xl font-bold mb-8">Leadership</h2>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {leadership.map((member: TeamMember) => (
+              <div key={member.id} className="mb-8">
+                <img 
+                  src={member.image} 
+                  alt={member.name}
+                  className="w-full h-auto mb-4"
+                  onError={(e) => {
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random`;
+                  }}
+                />
+                <div className="text-center py-2">
+                  <p className="text-lg text-gray-500 uppercase">{member.role}</p>
+                  <h3 className="text-2xl font-bold mt-1">{member.name}</h3>
+                  {member.twitter && (
+                    <div className="mt-2">
+                      <TwitterIcon className="h-6 w-6 mx-auto" />
                     </div>
-                  </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {otherMembers.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Team Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {otherMembers.map((member: TeamMember) => (
-                <div key={member.id} className="flex items-start gap-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={member.image} alt={member.name} />
-                    <AvatarFallback>{member.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h4 className="font-semibold">{member.name}</h4>
-                    <p className="text-sm text-muted-foreground">{member.role}</p>
-                    {member.bio && (
-                      <p className="mt-1 text-sm text-muted-foreground">{member.bio}</p>
-                    )}
-                    <div className="mt-2 flex gap-2">
-                      {member.linkedin && (
-                        <Button variant="ghost" size="icon" asChild>
-                          <a href={member.linkedin} target="_blank" rel="noopener noreferrer">
-                            <LinkedinIcon className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      )}
-                      {member.twitter && (
-                        <Button variant="ghost" size="icon" asChild>
-                          <a href={member.twitter} target="_blank" rel="noopener noreferrer">
-                            <TwitterIcon className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      )}
+        <div>
+          <h2 className="text-3xl font-bold mb-8">Team Members</h2>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {otherMembers.map((member: TeamMember) => (
+              <div key={member.id} className="mb-8">
+                <img 
+                  src={member.image} 
+                  alt={member.name}
+                  className="w-full h-auto mb-4"
+                  onError={(e) => {
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random`;
+                  }}
+                />
+                <div className="text-center py-2">
+                  <p className="text-lg text-gray-500 uppercase">{member.role}</p>
+                  <h3 className="text-2xl font-bold mt-1">{member.name}</h3>
+                  {member.twitter && (
+                    <div className="mt-2">
+                      <TwitterIcon className="h-6 w-6 mx-auto" />
                     </div>
-                  </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

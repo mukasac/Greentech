@@ -23,10 +23,6 @@ export function TeamMemberCard({ member }: TeamMemberCardProps) {
         <h3 className="font-semibold">{member.name}</h3>
         <p className="text-sm text-muted-foreground">{member.role}</p>
         
-        {member.bio && (
-          <p className="mt-2 text-sm text-muted-foreground">{member.bio}</p>
-        )}
-        
         <div className="mt-4 flex gap-2">
           {member.linkedin && (
             <Button variant="ghost" size="icon" asChild>

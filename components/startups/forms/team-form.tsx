@@ -5,14 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2 } from "lucide-react";
 
 interface TeamMember {
   id: string;
   name: string;
   role: string;
-  bio: string | null;
   image: string;
   linkedin: string | null;
   twitter: string | null;
@@ -27,7 +25,6 @@ export function TeamForm({ onChange }: TeamFormProps) {
       id: "1",
       name: "",
       role: "",
-      bio: "",
       image: "",
       linkedin: "",
       twitter: "",
@@ -39,7 +36,6 @@ export function TeamForm({ onChange }: TeamFormProps) {
       id: Date.now().toString(),
       name: "",
       role: "",
-      bio: "",
       image: "",
       linkedin: "",
       twitter: "",
@@ -66,7 +62,6 @@ export function TeamForm({ onChange }: TeamFormProps) {
   const updateParent = (members: TeamMember[]) => {
     const membersWithoutId = members.map(({ id, ...member }) => ({
       ...member,
-      bio: member.bio || null,
       linkedin: member.linkedin || null,
       twitter: member.twitter || null,
     }));
@@ -122,16 +117,6 @@ export function TeamForm({ onChange }: TeamFormProps) {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Bio</Label>
-                  <Textarea
-                    value={member.bio || ""}
-                    onChange={(e) =>
-                      handleChange(member.id, "bio", e.target.value)
-                    }
-                  />
-                </div>
-
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label>LinkedIn Profile</Label>
@@ -173,6 +158,4 @@ export function TeamForm({ onChange }: TeamFormProps) {
       </CardContent>
     </Card>
   );
-
-
 }

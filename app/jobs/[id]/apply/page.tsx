@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,11 +13,20 @@ import {
   Loader2, 
   AlertCircle,
   Upload,
-  Send
+  Send,
+  CheckCircle,
+  ClipboardCheck,
+  Calendar,
+  MapPin,
+  Briefcase,
+  User
 } from "lucide-react";
 import Link from "next/link";
 import { Job } from "@/lib/types/job";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Image from "next/image";
+import { formatDistanceToNow } from "date-fns";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface FormData {
   fullName: string;
@@ -25,6 +34,11 @@ interface FormData {
   phone: string;
   resume: File | null;
   coverLetter: string;
+  linkedin?: string;
+  portfolio?: string;
+  heardFrom?: string;
+  // Using company logo as profile image
+  profileImage?: string;
 }
 
 export default function JobApplyPage({ params }: { params: { id: string } }) {
@@ -34,13 +48,18 @@ export default function JobApplyPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null);
   
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     email: "",
     phone: "",
     resume: null,
-    coverLetter: ""
+    coverLetter: "",
+    linkedin: "",
+    portfolio: "",
+    heardFrom: "",
+    profileImage: ""
   });
 
   useEffect(() => {
@@ -60,6 +79,14 @@ export default function JobApplyPage({ params }: { params: { id: string } }) {
         const data = await response.json();
         console.log("Job data fetched:", data);
         setJob(data);
+        
+        // Set the profile image to company logo
+        if (data.startup?.logo) {
+          setFormData(prev => ({
+            ...prev,
+            profileImage: data.startup.logo
+          }));
+        }
       } catch (error) {
         console.error("Error fetching job:", error);
         setError(error instanceof Error ? error.message : "Failed to load job");
@@ -83,10 +110,12 @@ export default function JobApplyPage({ params }: { params: { id: string } }) {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
       setFormData(prev => ({
         ...prev,
-        resume: e.target.files![0]
+        resume: file
       }));
+      setResumeFileName(file.name);
     }
   };
 
@@ -113,7 +142,11 @@ export default function JobApplyPage({ params }: { params: { id: string } }) {
         email: "",
         phone: "",
         resume: null,
-        coverLetter: ""
+        coverLetter: "",
+        linkedin: "",
+        portfolio: "",
+        heardFrom: "",
+        profileImage: ""
       });
       
       // Redirect after success with a delay
@@ -126,6 +159,23 @@ export default function JobApplyPage({ params }: { params: { id: string } }) {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Format location
+  const formatLocation = (location: any) => {
+    if (!location) return "N/A";
+    
+    const { type, city, country } = location;
+    
+    if (type === "remote") {
+      return `Remote${country ? ` (${country})` : ''}`;
+    }
+    
+    if (city && country) {
+      return `${city}, ${country}`;
+    }
+    
+    return country || 'Unknown location';
   };
 
   if (loading) {
@@ -174,8 +224,8 @@ export default function JobApplyPage({ params }: { params: { id: string } }) {
         <div className="max-w-2xl mx-auto">
           <Card>
             <CardContent className="pt-6 px-6 pb-8 text-center">
-              <div className="mx-auto w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-4">
-                <Send className="h-6 w-6 text-green-600" />
+              <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
               <h2 className="text-2xl font-bold mb-2">Application Submitted!</h2>
               <p className="text-muted-foreground mb-6">
@@ -191,9 +241,9 @@ export default function JobApplyPage({ params }: { params: { id: string } }) {
       </div>
     );
   }
-
+  
   return (
-    <div className="container py-8">
+    <div className="container py-8 md:py-12">
       <div className="mb-6">
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/jobs/${params.id}`}>
@@ -203,116 +253,275 @@ export default function JobApplyPage({ params }: { params: { id: string } }) {
         </Button>
       </div>
       
-      <div className="max-w-3xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle>Apply for {job?.title}</CardTitle>
-            <CardDescription>
-              {job?.startup?.name && (
-                <div className="flex items-center mt-1">
-                  <Building2 className="h-4 w-4 mr-1 text-muted-foreground" />
-                  <span>{job.startup.name}</span>
-                </div>
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <Alert variant="destructive" className="mb-6">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name *</Label>
-                <Input
-                  id="fullName"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  required
-                  disabled={submitting}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  disabled={submitting}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  disabled={submitting}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="resume">Resume/CV *</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="resume"
-                    name="resume"
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={handleFileChange}
-                    required
-                    disabled={submitting}
-                    className="flex-1"
-                  />
-                  <div className="bg-secondary rounded-md p-2">
-                    <Upload className="h-5 w-5 text-secondary-foreground" />
+      <div className="max-w-7xl mx-auto">
+        <div className="grid gap-8 md:grid-cols-[1fr_2fr]">
+          {/* Job summary sidebar */}
+          <div>
+            <Card className="sticky top-4">
+              <CardHeader className="border-b">
+                <CardTitle>Job Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                {job?.startup && (
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="h-14 w-14 rounded-lg border overflow-hidden flex-shrink-0 bg-white p-1">
+                      {job.startup.logo ? (
+                        <Image
+                          src={job.startup.logo}
+                          alt={job.startup.name}
+                          width={56}
+                          height={56}
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                          <Building2 className="h-6 w-6 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-xl">{job.title}</h3>
+                      <p className="text-muted-foreground">{job.startup.name}</p>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <h3 className="font-medium">Location</h3>
+                      <p>{job?.location ? formatLocation(job.location) : 'N/A'}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <Briefcase className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <h3 className="font-medium">Job Type</h3>
+                      <p>{job?.type ? job.type.replace('-', ' ') : 'N/A'}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <h3 className="font-medium">Posted</h3>
+                      <p>{job?.postedAt ? formatDistanceToNow(new Date(job.postedAt), { addSuffix: true }) : 'N/A'}</p>
+                    </div>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Accepted formats: PDF, DOC, DOCX. Maximum size: 5MB.
-                </p>
-              </div>
+                
+                <div className="mt-6 pt-6 border-t">
+                  <h3 className="font-medium mb-2">Required Skills</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {job?.skills?.map((skill, index) => (
+                      <span 
+                        key={index} 
+                        className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium ring-1 ring-inset ring-gray-500/10"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Application form */}
+          <Card>
+            <CardHeader className="border-b">
+              <CardTitle className="text-2xl font-bold">Apply for {job?.title}</CardTitle>
+              <CardDescription>
+                Fill out the form below to apply for this position
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {error && (
+                <Alert variant="destructive" className="mb-6">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
               
-              <div className="space-y-2">
-                <Label htmlFor="coverLetter">Cover Letter</Label>
-                <Textarea
-                  id="coverLetter"
-                  name="coverLetter"
-                  value={formData.coverLetter}
-                  onChange={handleChange}
-                  placeholder="Tell us why you're interested in this position and what makes you a good fit."
-                  rows={6}
-                  disabled={submitting}
-                />
-              </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <Avatar className="h-16 w-16 border-2">
+                    {formData.profileImage ? (
+                      <AvatarImage src={formData.profileImage} alt="Profile" />
+                    ) : (
+                      <AvatarFallback>
+                        <User className="h-8 w-8" />
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div>
+                    <h3 className="text-base font-medium">Application Profile</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Your application profile uses the company logo as your profile image
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName">Full Name <span className="text-red-500">*</span></Label>
+                      <Input
+                        id="fullName"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        required
+                        disabled={submitting}
+                        placeholder="John Doe"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email Address <span className="text-red-500">*</span></Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        disabled={submitting}
+                        placeholder="johndoe@example.com"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        disabled={submitting}
+                        placeholder="+47 123 456 789"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="linkedin">LinkedIn Profile</Label>
+                      <Input
+                        id="linkedin"
+                        name="linkedin"
+                        type="url"
+                        value={formData.linkedin || ''}
+                        onChange={handleChange}
+                        disabled={submitting}
+                        placeholder="https://linkedin.com/in/username"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="portfolio">Portfolio or Website</Label>
+                    <Input
+                      id="portfolio"
+                      name="portfolio"
+                      type="url"
+                      value={formData.portfolio || ''}
+                      onChange={handleChange}
+                      disabled={submitting}
+                      placeholder="https://yourportfolio.com"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="resume">Resume/CV <span className="text-red-500">*</span></Label>
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          id="resume"
+                          name="resume"
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={handleFileChange}
+                          required
+                          disabled={submitting}
+                          className={resumeFileName ? "text-transparent" : ""}
+                        />
+                        {resumeFileName && (
+                          <div className="absolute inset-0 flex items-center px-3 pointer-events-none">
+                            <ClipboardCheck className="h-4 w-4 text-green-600 mr-2" />
+                            <span className="truncate">{resumeFileName}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="bg-primary/10 rounded-md p-2 flex-shrink-0">
+                        <Upload className="h-5 w-5 text-primary" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Accepted formats: PDF, DOC, DOCX. Maximum size: 5MB.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="coverLetter">Cover Letter</Label>
+                    <Textarea
+                      id="coverLetter"
+                      name="coverLetter"
+                      value={formData.coverLetter}
+                      onChange={handleChange}
+                      placeholder="Tell us why you're interested in this position and what makes you a good fit."
+                      rows={6}
+                      disabled={submitting}
+                      className="resize-none"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="heardFrom">How did you hear about this position?</Label>
+                    <Input
+                      id="heardFrom"
+                      name="heardFrom"
+                      value={formData.heardFrom || ''}
+                      onChange={handleChange}
+                      disabled={submitting}
+                      placeholder="LinkedIn, friend, company website, etc."
+                    />
+                  </div>
+                </div>
               
-              <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    "Submit Application"
-                  )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                <CardFooter className="flex justify-end px-0 pt-4 pb-0">
+                  <div className="flex gap-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      disabled={submitting}
+                      asChild
+                    >
+                      <Link href={`/jobs/${params.id}`}>Cancel</Link>
+                    </Button>
+                    <Button type="submit" disabled={submitting}>
+                      {submitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="mr-2 h-4 w-4" />
+                          Submit Application
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardFooter>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

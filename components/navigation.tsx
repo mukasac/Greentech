@@ -14,7 +14,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { ModeToggle } from "@/components/mode-toggle";
-import { Leaf, UserCog } from "lucide-react";
+import { Leaf, UserCog, Menu, X } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -31,8 +31,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { usePermissions } from "@/hooks/usePermissions";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-const components: { title: string; href: string; description: string }[] = [
+const regions: { title: string; href: string; description: string }[] = [
   {
     title: "Norway",
     href: "/regions/norway",
@@ -69,6 +71,7 @@ export function Navigation() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { hasPermission } = usePermissions();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const getInitials = (name: string | null | undefined): string => {
     if (!name) return "";
@@ -90,91 +93,122 @@ export function Navigation() {
     }
   };
 
+  // Navigation links used in both desktop and mobile
+  const navLinks = [
+    { label: "Startups", href: "/startups" },
+    { label: "Events", href: "/events" },
+    { label: "News", href: "/news" },
+    { label: "Jobs", href: "/jobs" },
+  ];
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="p-10 flex h-16 items-center w-screen overflow-hidden">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center space-x-2">
-          <Leaf className="h-6 w-6 text-green-600" />
-          <span className="font-bold">GreenTech Nordics</span>
+          <Leaf className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+          <span className="font-bold text-sm sm:text-base">GreenTech Nordics</span>
         </Link>
 
-        <NavigationMenu className="mx-6">
+        {/* Desktop Navigation */}
+        <NavigationMenu className="hidden md:flex">
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuTrigger>Regions</NavigationMenuTrigger>
               <NavigationMenuContent>
-                <ul className="grid w-[400px] gap-3 fixed p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] z-50"
-                    style={{
-                      zIndex: 100,
-                      position: "fixed",
-                      background: "black",
-                    }}>
-                  {components.map((component) => (
+                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                  {regions.map((region) => (
                     <ListItem
-                      key={component.title}
-                      title={component.title}
-                      href={component.href}
+                      key={region.title}
+                      title={region.title}
+                      href={region.href}
                     >
-                      {component.description}
+                      {region.description}
                     </ListItem>
                   ))}
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
 
-            <NavigationMenuItem>
-              <Link href="/startups" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Startups
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <Link href="/events" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Events
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <Link href="/news" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  News
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <Link href="/jobs" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Jobs
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
+            {navLinks.map((link) => (
+              <NavigationMenuItem key={link.href}>
+                <Link href={link.href} legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    {link.label}
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+            ))}
           </NavigationMenuList>
         </NavigationMenu>
 
-        <div className="ml-auto mr-10 flex items-center space-x-4">
-          <ModeToggle />
-        </div>
+        {/* Mobile Menu Button */}
+        <Sheet>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="icon" className="h-9 w-9 p-0">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[80%] sm:w-[350px]">
+            <div className="flex flex-col gap-6 pt-6">
+              <Link 
+                href="/" 
+                className="flex items-center space-x-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Leaf className="h-5 w-5 text-green-600" />
+                <span className="font-bold">GreenTech Nordics</span>
+              </Link>
+              
+              <div className="space-y-1">
+                <div className="px-3 py-2">
+                  <h3 className="mb-2 font-semibold text-lg">Regions</h3>
+                  <div className="space-y-1 pl-1">
+                    {regions.map((region) => (
+                      <Link 
+                        key={region.title} 
+                        href={region.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block py-2 text-muted-foreground hover:text-foreground"
+                      >
+                        {region.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                
+                {navLinks.map((link) => (
+                  <Link 
+                    key={link.href} 
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 font-medium hover:bg-accent rounded-md"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <ModeToggle />
+
           {status === "unauthenticated" ? (
             <Link href="/auth">
-              <button className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 text-sm">
                 Login
-              </button>
+              </Button>
             </Link>
           ) : status === "authenticated" && session?.user ? (
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <DropdownMenu>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <DropdownMenuTrigger className="focus:outline-none">
-                        <Avatar className="h-8 w-8 bg-slate-600">
+                        <Avatar className="h-7 w-7 sm:h-8 sm:w-8 bg-slate-600">
                           <AvatarFallback>
                             {getInitials(session.user.name || session.user.email)}
                           </AvatarFallback>
@@ -190,25 +224,14 @@ export function Navigation() {
                   <DropdownMenuItem asChild>
                     <Link href="/startups/dashboard">Dashboard</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings">Settings</Link>
-                  </DropdownMenuItem>
+                  
                   <DropdownMenuItem onClick={handleLogout}>
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               
-              {hasPermission("ADMIN_ACCESS") && (
-                <Link href="/roles/roleManagement">
-                  <button className="flex items-center justify-center p-2 text-white rounded-md hover:bg-slate-700 transition-colors">
-                    <UserCog className="h-5 w-5" />
-                  </button>
-                </Link>
-              )}
+      
             </div>
           ) : null}
         </div>

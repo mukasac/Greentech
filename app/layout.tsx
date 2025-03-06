@@ -12,6 +12,7 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'GreenTech Nordics - Sustainable Innovation Hub',
   description: 'The central hub for green technology, eco-friendly innovations, and environmental policy in the Nordic region.',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
 };
 
 export default function RootLayout({
@@ -23,7 +24,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Google Analytics */}
-        <Script 
+        <Script
           strategy="afterInteractive"
           src={`https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX`}
         />
@@ -42,10 +43,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} text-base antialiased`}>
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <div className="flex min-h-screen flex-col">
+            <div className="flex min-h-screen flex-col overflow-x-hidden">
               <Navigation />
               <main className="flex-1">{children}</main>
               <Footer />

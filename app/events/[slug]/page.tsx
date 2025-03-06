@@ -20,13 +20,11 @@ import {
   AlertCircle 
 } from "lucide-react";
 import Link from "next/link";
-import { usePermissions } from "@/hooks/usePermissions";
 import { Event } from "@/lib/types/event";
 
 export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { hasPermission } = usePermissions();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,33 +55,13 @@ export default function EventDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [params.slug]);  // This closing parenthesis and dependency array was missing
+  }, [params.slug]);
 
   const handleRegister = async () => {
     if (!event) return;
-    
-    if (!hasPermission("REGISTER_FOR_EVENT")) {
-      router.push("/auth");
-      return;
-    }
 
     try {
       setRegistering(true);
-      
-      // This would normally be an API call
-      // const response = await fetch(`/api/events/${event.id}/register`, {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     eventId: event.id
-      //   }),
-      // });
-      
-      // if (!response.ok) {
-      //   throw new Error("Failed to register for event");
-      // }
       
       // Simulate a successful registration
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -99,7 +77,7 @@ export default function EventDetailPage() {
 
   if (loading) {
     return (
-      <div className="container py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
+      <div className="container py-4 md:py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <div className="flex flex-col items-center">
           <Loader2 className="h-8 w-8 animate-spin mb-4" />
           <p>Loading event details...</p>
@@ -110,9 +88,9 @@ export default function EventDetailPage() {
 
   if (error || !event) {
     return (
-      <div className="container py-8">
-        <div className="mb-6">
-          <Button variant="ghost" size="sm" asChild>
+      <div className="container py-4 md:py-8">
+        <div className="mb-4 md:mb-6">
+          <Button variant="ghost" size="sm" asChild className="h-8">
             <Link href="/events">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Events
@@ -121,13 +99,13 @@ export default function EventDetailPage() {
         </div>
         
         <Card>
-          <CardContent className="py-12">
+          <CardContent className="p-4 md:p-8 py-8 md:py-12">
             <div className="flex flex-col items-center text-center">
-              <AlertCircle className="mb-4 h-12 w-12 text-red-500" />
-              <h2 className="mb-2 text-xl font-semibold">
+              <AlertCircle className="mb-4 h-10 w-10 md:h-12 md:w-12 text-red-500" />
+              <h2 className="mb-2 text-lg md:text-xl font-semibold">
                 {error || "Event not found"}
               </h2>
-              <p className="mb-6 text-muted-foreground">
+              <p className="mb-6 text-sm md:text-base text-muted-foreground">
                 The event you are looking for does not exist or has been removed.
               </p>
               <Button asChild>
@@ -145,9 +123,9 @@ export default function EventDetailPage() {
   const registrationsClosed = isPastEvent || (event.maxAttendees && event.attendees >= event.maxAttendees);
 
   return (
-    <div className="container py-8">
-      <div className="mb-6">
-        <Button variant="ghost" size="sm" asChild>
+    <div className="container py-4 md:py-8">
+      <div className="mb-4 md:mb-6">
+        <Button variant="ghost" size="sm" asChild className="h-8">
           <Link href="/events">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Events
@@ -155,11 +133,12 @@ export default function EventDetailPage() {
         </Button>
       </div>
       
-      <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
+      <div className="grid gap-6 md:gap-8">
+        {/* Main content - always full width on mobile, 2/3 on desktop */}
         <main>
           <Card>
-            <CardContent className="p-8">
-              <div className="mb-6 flex flex-wrap gap-2">
+            <CardContent className="p-4 md:p-8">
+              <div className="mb-4 md:mb-6 flex flex-wrap gap-2">
                 <Badge>{event.type}</Badge>
                 {event.tags.map((tag) => (
                   <Badge key={tag} variant="secondary">
@@ -168,9 +147,71 @@ export default function EventDetailPage() {
                 ))}
               </div>
               
-              <h1 className="mb-4 text-3xl font-bold">{event.title}</h1>
+              <h1 className="mb-4 text-2xl md:text-3xl font-bold">{event.title}</h1>
               
-              <div className="mb-8 grid gap-4 sm:grid-cols-2">
+              {/* Mobile-optimized event details at the top */}
+              <div className="mb-6 md:hidden space-y-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Date: </span>
+                    <span>{eventDate.toLocaleDateString()}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Time: </span>
+                    <span>{eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Location: </span>
+                    <span>{event.location}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Attendees: </span>
+                    <span>
+                      {event.maxAttendees 
+                        ? `${event.attendees} / ${event.maxAttendees}`
+                        : event.attendees}
+                    </span>
+                  </div>
+                </div>
+                
+                {event.price && (
+                  <div className="flex items-center gap-2">
+                    <Banknote className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <div>
+                      <span className="font-medium">Price: </span>
+                      <span>
+                        {event.price.amount === 0 
+                          ? "Free" 
+                          : `${event.price.amount} ${event.price.currency}`}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex items-center gap-2">
+                  <Building className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="font-medium">Organizer: </span>
+                    <span>{event.organizer.name}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Desktop event details grid */}
+              <div className="mb-6 hidden md:grid gap-4 sm:grid-cols-2">
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="h-5 w-5 text-muted-foreground" />
                   <div>
@@ -210,15 +251,15 @@ export default function EventDetailPage() {
                 </div>
               </div>
               
-              <div className="mb-8">
-                <h2 className="mb-3 text-xl font-semibold">About the Event</h2>
-                <div className="text-muted-foreground whitespace-pre-line">
+              <div className="mb-6 md:mb-8">
+                <h2 className="mb-2 md:mb-3 text-lg md:text-xl font-semibold">About the Event</h2>
+                <div className="text-sm md:text-base text-muted-foreground whitespace-pre-line">
                   {event.description}
                 </div>
               </div>
               
-              <div className="flex items-center justify-between">
-                <Button variant="outline" className="gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <Button variant="outline" className="gap-2 w-full sm:w-auto">
                   <Share className="h-4 w-4" />
                   Share Event
                 </Button>
@@ -231,36 +272,33 @@ export default function EventDetailPage() {
                     </AlertDescription>
                   </Alert>
                 ) : (
-                  <div className="text-right">
-                    {isPastEvent ? (
-                      <p className="text-sm text-muted-foreground mb-2">This event has already taken place</p>
-                    ) : event.maxAttendees && event.attendees >= event.maxAttendees ? (
-                      <p className="text-sm text-muted-foreground mb-2">This event is fully booked</p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {event.maxAttendees 
-                          ? `${event.attendees} / ${event.maxAttendees} attendees`
-                          : `${event.attendees} attendees`}
-                      </p>
-                    )}
+                  <div className="flex flex-col items-center sm:items-end gap-2">
+                    <p className="text-sm text-muted-foreground">
+                      {isPastEvent 
+                        ? "This event has already taken place" 
+                        : event.maxAttendees && event.attendees >= event.maxAttendees 
+                          ? "This event is fully booked"
+                          : event.maxAttendees 
+                            ? `${event.attendees} / ${event.maxAttendees} attendees`
+                            : `${event.attendees} attendees`}
+                    </p>
                     
-                    {hasPermission("REGISTER_FOR_EVENT") && (
-                      <Button 
-                        onClick={handleRegister} 
-                        disabled={registering || registrationsClosed ? true : undefined}
-                      >
-                        {registering ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Registering...
-                          </>
-                        ) : registrationsClosed ? (
-                          "Registration Closed"
-                        ) : (
-                          "Register Now"
-                        )}
-                      </Button>
-                    )}
+                    <Button 
+                      onClick={handleRegister} 
+                      disabled={registering || registrationsClosed ? true : undefined}
+                      className="w-full sm:w-auto"
+                    >
+                      {registering ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Registering...
+                        </>
+                      ) : registrationsClosed ? (
+                        "Registration Closed"
+                      ) : (
+                        "Register Now"
+                      )}
+                    </Button>
                   </div>
                 )}
               </div>
@@ -268,7 +306,8 @@ export default function EventDetailPage() {
           </Card>
         </main>
         
-        <aside>
+        {/* Event details sidebar - hidden on mobile, shown on lg screens */}
+        <aside className="hidden lg:block">
           <Card>
             <CardHeader>
               <CardTitle>Event Details</CardTitle>

@@ -7,12 +7,12 @@ import {
   Building2, 
   MapPin, 
   Calendar, 
-  Briefcase, 
   ArrowUpRight
 } from "lucide-react";
 import Link from "next/link";
 import { Job } from "@/lib/types/job";
 import { formatDistanceToNow } from "date-fns";
+import Image from "next/image";
 
 interface JobCardProps {
   job: Job;
@@ -24,24 +24,6 @@ export function JobCard({ job }: JobCardProps) {
     ? formatDistanceToNow(job.postedAt, { addSuffix: true })
     : formatDistanceToNow(new Date(job.postedAt), { addSuffix: true });
 
-  // Format salary range
-  const formatSalary = () => {
-    if (!job.salary) return "Competitive";
-    const { min, max, currency } = job.salary;
-    
-    const formatNumber = (num: number) => {
-      // For thousands, show as 70k instead of 70,000
-      if (num >= 1000) {
-        return `${Math.round(num / 1000)}k`;
-      }
-      return num.toString();
-    };
-    
-    if (min === 0 && max === 0) return "Competitive";
-    if (min === max) return `${currency} ${formatNumber(min)}`;
-    return `${currency} ${formatNumber(min)} - ${formatNumber(max)}`;
-  };
-  
   // Format location
   const formatLocation = () => {
     if (!job.location) return "N/A";
@@ -53,84 +35,72 @@ export function JobCard({ job }: JobCardProps) {
     }
     
     if (city && country) {
-      return `${city}, ${country} (${type})`;
+      return `${city}, ${country}`;
     }
     
-    return `${country || 'Unknown'} (${type})`;
+    return country || 'Unknown location';
   };
 
   // Job detail link - convert any "mock-" IDs to regular format
   const jobId = job.id.startsWith("mock-") ? job.id.replace("mock-", "") : job.id;
   const detailUrl = `/jobs/${jobId}`;
-  const applyUrl = `/jobs/${jobId}/apply`;
 
   return (
     <div className="group relative">
-      {/* Make the entire card clickable but avoid nested links */}
+      {/* Make the entire card clickable */}
       <Link href={detailUrl} className="absolute inset-0 z-10" aria-hidden="true" />
       
-      <Card className="overflow-hidden h-full relative border-2 hover:border-primary/20 transition-all group-hover:scale-[1.01] group-hover:shadow-md">
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="secondary">{job.type.replace('-', ' ')}</Badge>
-                <Badge variant="outline">{job.experienceLevel}</Badge>
+      <Card className="overflow-hidden h-full relative border hover:border-primary/20 transition-all group-hover:shadow-md">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-4">
+            <div className="h-12 w-12 rounded-md overflow-hidden flex-shrink-0 bg-white border">
+              {job.startup?.logo ? (
+                <Image 
+                  src={job.startup.logo} 
+                  alt={job.startup?.name || "Company logo"}
+                  width={48}
+                  height={48}
+                  className="h-full w-full object-contain"
+                />
+              ) : (
+                <div className="h-full w-full bg-gray-100 flex items-center justify-center text-gray-400">
+                  <Building2 className="h-6 w-6" />
+                </div>
+              )}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-base mb-1 truncate">{job.title}</h3>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Building2 className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
+                <span className="truncate">{job.startup?.name || "Unknown Company"}</span>
               </div>
-              <h3 className="font-semibold text-xl mb-1">{job.title}</h3>
-              <div className="flex items-center text-sm text-muted-foreground mb-2">
-                <Building2 className="h-3.5 w-3.5 mr-1" />
-                <span>{job.startup?.name || "Unknown Company"}</span>
+              
+              <div className="mt-2 flex items-center text-sm text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
+                <span className="truncate">{formatLocation()}</span>
               </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5 mr-1" />
-              <span>{formatLocation()}</span>
-            </div>
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Calendar className="h-3.5 w-3.5 mr-1" />
-              <span>Posted {formattedDate}</span>
-            </div>
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Briefcase className="h-3.5 w-3.5 mr-1" />
-              <span>{job.department}</span>
-            </div>
-            <div className="flex items-center text-sm text-muted-foreground">
-              <span className="font-medium">Salary: {formatSalary()}</span>
+              
+              <div className="flex items-center gap-2 mt-2">
+                <Badge variant="outline" className="text-xs">
+                  {job.type.replace('-', ' ')}
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                  {job.experienceLevel}
+                </Badge>
+                <span className="text-xs text-muted-foreground ml-auto flex items-center">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  {formattedDate}
+                </span>
+              </div>
             </div>
           </div>
           
-          <div className="mt-4">
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {job.description}
-            </p>
-          </div>
-
-          <div className="mt-4">
-            <h4 className="text-xs font-medium mb-1.5">Required Skills:</h4>
-            <div className="flex flex-wrap gap-1.5">
-              {job.skills.slice(0, 4).map((skill, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {skill}
-                </Badge>
-              ))}
-              {job.skills.length > 4 && (
-                <Badge variant="outline" className="text-xs">
-                  +{job.skills.length - 4} more
-                </Badge>
-              )}
-            </div>
-          </div>
-
-          {/* Apply button - positioned with higher z-index so it works over the card link */}
-          <div className="mt-6 flex justify-end">
+          <div className="mt-4 flex justify-end">
             <div className="relative z-20">
-              <Button asChild>
-                <Link href={applyUrl}>
-                  Apply Now <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
+              <Button size="sm" variant="outline" asChild className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <Link href={detailUrl}>
+                  View Job <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                 </Link>
               </Button>
             </div>

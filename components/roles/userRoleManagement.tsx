@@ -11,11 +11,24 @@ import { Button } from "@/components/ui/button"
 import { AlertCircle, UserCheck } from "lucide-react"
 import { useEffect, useState } from "react"
 
+// Define interfaces for our data types
+interface Role {
+    id: string;
+    name: string;
+}
+
+interface User {
+    id: string;
+    name: string | null;
+    email: string;
+    role?: Role;
+}
+
 const UserRoleManagement = () => {
-    const [users, setUsers] = useState([]);
-    const [roles, setRoles] = useState([]);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [users, setUsers] = useState<User[]>([]);
+    const [roles, setRoles] = useState<Role[]>([]);
+    const [error, setError] = useState<string>('');
+    const [success, setSuccess] = useState<string>('');
 
     // Fetch users when component mounts
     useEffect(() => {
@@ -50,7 +63,7 @@ const UserRoleManagement = () => {
     }, []);
 
     // Function to handle role changes
-    const handleRoleChange = async (userId, newRoleId) => {
+    const handleRoleChange = async (userId: string, newRoleId: string) => {
         try {
             // Make API call to update user role
             const response = await fetch('/api/users/role', {

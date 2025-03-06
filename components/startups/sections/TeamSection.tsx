@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, Pencil, UserPlus } from "lucide-react";
@@ -68,11 +68,6 @@ export function TeamSection({ startup }: TeamSectionProps) {
                   </Link>
                 </Button>
               </div>
-              {member.bio && (
-                <p className="mt-4 text-sm text-muted-foreground">
-                  {member.bio}
-                </p>
-              )}
             </CardContent>
           </Card>
         ))}

@@ -1,14 +1,12 @@
-// components/news/news-list.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, Loader2 } from "lucide-react";
+import { Calendar, Loader2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { NewsItem } from "@/lib/types/news";
-import { usePermissions } from "@/hooks/usePermissions";
 
 interface NewsListProps {
   region?: string;
@@ -20,10 +18,10 @@ export function NewsList({ region, category, limit = 6 }: NewsListProps) {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { hasPermission } = usePermissions();
 
   useEffect(() => {
     fetchNews();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [region, category, limit]);
 
   const fetchNews = async () => {
@@ -59,7 +57,7 @@ export function NewsList({ region, category, limit = 6 }: NewsListProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-6">
         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
         <span>Loading news...</span>
       </div>
@@ -68,7 +66,7 @@ export function NewsList({ region, category, limit = 6 }: NewsListProps) {
 
   if (error) {
     return (
-      <div className="py-6 text-center">
+      <div className="py-4 text-center">
         <p className="text-red-500">{error}</p>
       </div>
     );
@@ -76,51 +74,58 @@ export function NewsList({ region, category, limit = 6 }: NewsListProps) {
 
   if (news.length === 0) {
     return (
-      <div className="py-6 text-center">
+      <div className="py-4 text-center">
         <p className="text-muted-foreground">No news articles found.</p>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-4">
       {news.map((item) => (
-        <Card key={item.id}>
-          <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
-            <CardContent className="p-6">
-              <div className="mb-4 flex flex-wrap gap-2">
-                {item.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary">
-                    {tag}
-                  </Badge>
-                ))}
+        <Link href={`/news/${item.slug}`} key={item.id} className="block">
+          <Card className="overflow-hidden transition-colors hover:bg-muted/50 cursor-pointer">
+            <div className="flex flex-row">
+              {/* Image on the left for both mobile and desktop */}
+              <div className="w-24 md:w-32 flex-shrink-0">
+                <Image
+                  src={item.image}
+                  alt={item.title}
+                  width={128}
+                  height={128}
+                  className="h-full w-full object-cover"
+                />
               </div>
-              <h3 className="mb-2 text-2xl font-semibold">{item.title}</h3>
-              <p className="mb-4 text-muted-foreground">{item.excerpt}</p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  <span>{new Date(item.publishedAt).toLocaleDateString()}</span>
+              
+              {/* Content */}
+              <CardContent className="flex flex-col justify-between p-3 md:p-4 flex-grow">
+                {/* Tags */}
+                <div>
+                  <div className="mb-2 flex flex-wrap gap-1">
+                    {item.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-xs px-1.5 py-0">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  
+                  {/* Title only (no excerpt) */}
+                  <h3 className="font-semibold text-sm md:text-base line-clamp-2">
+                    {item.title}
+                  </h3>
                 </div>
-                {hasPermission("VIEW_LATEST_NEWS") && (
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/news/${item.slug}`}>
-                      Read More
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-            <div className="relative aspect-video md:aspect-auto">
-              <img
-                src={item.image}
-                alt={item.title}
-                className="h-full w-full object-cover"
-              />
+                
+                {/* Footer: Date - Removed button since entire card is clickable */}
+                <div className="flex items-center mt-auto pt-2">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Calendar className="h-3 w-3" />
+                    <span>{new Date(item.publishedAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </CardContent>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </Link>
       ))}
     </div>
   );
