@@ -1,7 +1,7 @@
+// app/startups/dashboard/profile/page.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { 
   Card, 
   CardContent, 
@@ -21,26 +21,25 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Settings2, ShieldAlert, BarChart } from "lucide-react";
 import Link from "next/link";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useSearchParams } from "next/navigation";
 
 export default function StartupProfilePage() {
-  // Get startup ID from URL if present (for redirects after claiming)
-  const searchParams = useSearchParams();
-  const startupIdFromUrl = searchParams.get('startupId');
-  
   const [startup, setStartup] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { hasPermission } = usePermissions();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  
+  // Determine which tab to show by default
+  const defaultTab = tabParam && ['climate', 'team', 'jobs', 'blog', 'gallery', 'analytics'].includes(tabParam) 
+    ? tabParam 
+    : 'climate';
 
   useEffect(() => {
     const fetchStartupData = async () => {
       try {
-        // If we have a specific startup ID from the URL, fetch that one
-        const endpoint = startupIdFromUrl 
-          ? `/api/startups/${startupIdFromUrl}` 
-          : '/api/startups/current';
-          
-        const response = await fetch(endpoint);
+        const response = await fetch('/api/startups/current');
         if (!response.ok) throw new Error('Failed to fetch startup data');
         const data = await response.json();
         setStartup(data);
@@ -52,7 +51,7 @@ export default function StartupProfilePage() {
     };
 
     fetchStartupData();
-  }, [startupIdFromUrl]);
+  }, []);
 
   if (loading) {
     return (
@@ -90,7 +89,7 @@ export default function StartupProfilePage() {
           </Button>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="climate" className="w-full">
+          <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="climate">Climate Impact</TabsTrigger>
               <TabsTrigger value="team">Team</TabsTrigger>

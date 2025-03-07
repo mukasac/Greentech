@@ -85,7 +85,8 @@ export default function CreateJobPage() {
   const handleSuccess = () => {
     setSuccess("Job posted successfully!");
     setTimeout(() => {
-      router.push("/startups/dashboard/jobs");
+      // Redirect to profile page with jobs tab selected
+      router.push("/startups/dashboard/profile?tab=jobs");
     }, 2000);
   };
 

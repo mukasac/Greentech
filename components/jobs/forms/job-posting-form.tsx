@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,8 @@ interface JobPostingFormProps {
   startupId: string;
   onSuccess: () => void;
   onError: (message: string) => void;
+  initialData?: any;
+  isEditing?: boolean;
 }
 
 interface FormState {
@@ -36,37 +38,12 @@ interface FormState {
   department: string;
 }
 
-interface JobApiRequest {
-  title: string;
-  type: JobType;
-  experienceLevel: ExperienceLevel;
-  location: {
-    type: WorkLocation;
-    city: string | null;
-    country: string;
-  };
-  salary: {
-    min: number;
-    max: number;
-    currency: Currency;
-  };
-  description: string;
-  requirements: string[];
-  responsibilities: string[];
-  skills: string[];
-  department: string;
-  startup: {
-    id: string;
-  };
-  status: "active";
-  postedAt: string;
-  expiresAt: string;
-}
-
 const JobPostingForm: React.FC<JobPostingFormProps> = ({ 
   startupId,
   onSuccess,
-  onError
+  onError,
+  initialData,
+  isEditing = false
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -88,45 +65,74 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     department: "",
   });
 
+  // Initialize form with existing data if editing
+  useEffect(() => {
+    if (initialData && isEditing) {
+      setFormData({
+        title: initialData.title || "",
+        type: initialData.type || "full-time",
+        experienceLevel: initialData.experienceLevel || "mid",
+        locationType: initialData.locationType || "hybrid",
+        city: initialData.city || "",
+        country: initialData.country || "",
+        salaryMin: initialData.salaryMin?.toString() || "",
+        salaryMax: initialData.salaryMax?.toString() || "",
+        currency: initialData.currency || "EUR",
+        description: initialData.description || "",
+        requirements: initialData.requirements || "",
+        responsibilities: initialData.responsibilities || "",
+        skills: initialData.skills || "",
+        department: initialData.department || "",
+      });
+    }
+  }, [initialData, isEditing]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMessage(null);
 
     try {
-      const response = await fetch('/api/jobs', {
-        method: 'POST',
+      // Create the request payload
+      const payload = {
+        ...formData,
+        startup: {
+          id: startupId
+        },
+        requirements: formData.requirements.split('\n').filter(Boolean),
+        responsibilities: formData.responsibilities.split('\n').filter(Boolean),
+        skills: formData.skills.split(',').map(skill => skill.trim()).filter(Boolean),
+        salary: {
+          min: parseInt(formData.salaryMin),
+          max: parseInt(formData.salaryMax),
+          currency: formData.currency
+        },
+        location: {
+          type: formData.locationType,
+          city: formData.city || null,
+          country: formData.country
+        }
+      };
+
+      // Determine if we're creating or updating
+      const url = isEditing ? `/api/jobs/${initialData.id}` : '/api/jobs';
+      const method = isEditing ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          startup: {
-            id: startupId
-          },
-          requirements: formData.requirements.split('\n').filter(Boolean),
-          responsibilities: formData.responsibilities.split('\n').filter(Boolean),
-          skills: formData.skills.split(',').map(skill => skill.trim()).filter(Boolean),
-          salary: {
-            min: parseInt(formData.salaryMin),
-            max: parseInt(formData.salaryMax),
-            currency: formData.currency
-          },
-          location: {
-            type: formData.locationType,
-            city: formData.city || null,
-            country: formData.country
-          }
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create job posting');
+        throw new Error(isEditing ? 'Failed to update job posting' : 'Failed to create job posting');
       }
 
       onSuccess();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'An error occurred while creating the job posting';
+      const message = error instanceof Error ? error.message : 'An error occurred while processing the job posting';
       setErrorMessage(message);
       onError(message);
     } finally {
@@ -341,7 +347,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
       </div>
 
       <Button type="submit" disabled={isSubmitting} className="w-full">
-        {isSubmitting ? "Posting Job..." : "Post Job"}
+        {isSubmitting ? (isEditing ? "Updating Job..." : "Posting Job...") : (isEditing ? "Update Job" : "Post Job")}
       </Button>
     </form>
   );

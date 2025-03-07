@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowLeft, AlertCircle, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image"; // Import Next.js Image component
 import { supabase } from "@/lib/supabase";
 
 interface AddGalleryImageProps {
@@ -173,7 +174,7 @@ export default function AddGalleryImagePage({ params }: AddGalleryImageProps) {
   
       setSuccess("Image added successfully!");
       setTimeout(() => {
-        router.push(`/startups/dashboard/gallery`);
+        router.push(`/startups/dashboard/profile?tab=gallery`);
         router.refresh();
       }, 2000);
     } catch (err) {
@@ -182,11 +183,29 @@ export default function AddGalleryImagePage({ params }: AddGalleryImageProps) {
       // Fallback: Direct Supabase Insertion if API fails
       if (err instanceof Error && err.message.includes("Failed to add image to database")) {
         try {
+          // Define publicUrl here since it would be out of scope otherwise
+          let publicUrl = "";
+          
+          // Only try to access file properties if file is not null
+          if (formData.file) {
+            const timestamp = Date.now();
+            const randomString = Math.random().toString(36).substring(2, 15);
+            const fileExt = formData.file.name.split(".").pop();
+            const fileName = `${params.id}/${timestamp}-${randomString}.${fileExt}`;
+            
+            // Get the public URL (this should have been done earlier, but ensuring it's available here)
+            const { data } = supabase.storage
+              .from("gallery")
+              .getPublicUrl(fileName);
+              
+            publicUrl = data.publicUrl;
+          }
+          
           const { error: dbError } = await supabase
             .from("gallery")
             .insert({
               url: publicUrl,
-              alt: formData.alt || formData.file.name,
+              alt: formData.alt || (formData.file ? formData.file.name : ""),
               caption: formData.caption,
               startupId: params.id,
             });
@@ -197,7 +216,7 @@ export default function AddGalleryImagePage({ params }: AddGalleryImageProps) {
   
           setSuccess("Image added successfully!");
           setTimeout(() => {
-            router.push(`/startups/${params.id}/gallery`);
+            router.push(`/startups/dashboard/profile?tab=gallery`);
             router.refresh();
           }, 2000);
         } catch (fallbackErr) {
@@ -259,11 +278,15 @@ export default function AddGalleryImagePage({ params }: AddGalleryImageProps) {
                 />
                 {imagePreview && (
                   <div className="mt-2 aspect-video w-full overflow-hidden rounded-lg border">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="h-full w-full object-cover"
-                    />
+                    {/* Replace img with Next.js Image component */}
+                    <div className="relative h-full w-full">
+                      <Image
+                        src={imagePreview}
+                        alt="Preview"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
                   </div>
                 )}
               </div>

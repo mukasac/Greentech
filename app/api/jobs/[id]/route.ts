@@ -1,5 +1,45 @@
+// File: app/api/jobs/[id]/route.ts
+
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/route";
+import { z } from "zod";
+import { JobType, ExperienceLevel, WorkLocation, Currency } from "@/lib/types/job";
+
+// Define validation schema using Zod
+const updateJobSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  type: z.enum([JobType.FULL_TIME, JobType.PART_TIME, JobType.CONTRACT, JobType.INTERNSHIP]),
+  experienceLevel: z.enum([
+    ExperienceLevel.ENTRY,
+    ExperienceLevel.MID,
+    ExperienceLevel.SENIOR,
+    ExperienceLevel.LEAD,
+    ExperienceLevel.EXECUTIVE,
+  ]),
+  location: z.object({
+    type: z.enum([WorkLocation.REMOTE, WorkLocation.HYBRID, WorkLocation.ON_SITE]),
+    city: z.string().nullable(),
+    country: z.string().min(1, "Country is required"),
+  }),
+  salary: z.object({
+    min: z.number().min(0, "Minimum salary must be positive"),
+    max: z.number().min(0, "Maximum salary must be positive"),
+    currency: z.enum([Currency.USD, Currency.EUR, Currency.GBP, Currency.NOK]),
+  }).refine(data => data.max >= data.min, {
+    message: "Maximum salary must be greater than or equal to minimum salary",
+    path: ["max"],
+  }),
+  description: z.string().min(1, "Description is required"),
+  requirements: z.array(z.string()).min(1, "At least one requirement is required"),
+  responsibilities: z.array(z.string()).min(1, "At least one responsibility is required"),
+  skills: z.array(z.string()).min(1, "At least one skill is required"),
+  department: z.string().min(1, "Department is required"),
+  startup: z.object({
+    id: z.string().min(1, "Startup ID is required"),
+  }),
+});
 
 export async function GET(
   req: Request,
@@ -167,6 +207,111 @@ export async function GET(
     console.error("Error fetching job:", error);
     return NextResponse.json(
       { error: "Failed to fetch job" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // Authentication check
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check permissions - FIXED: Changed EDIT_JOBS to UPDATE_JOBS
+    if (!session.user.permissions?.includes("UPDATE_JOBS")) {
+      return NextResponse.json(
+        { error: "You don't have permission to edit jobs" },
+        { status: 403 }
+      );
+    }
+
+    const jobId = params.id;
+    
+    // Check if job exists
+    const existingJob = await db.job.findUnique({
+      where: { id: jobId },
+      select: { 
+        id: true,
+        startupId: true
+      }
+    });
+
+    if (!existingJob) {
+      return NextResponse.json(
+        { error: "Job not found" },
+        { status: 404 }
+      );
+    }
+
+    // Get the user's startups to check ownership
+    const userStartups = await db.startup.findMany({
+      where: { userId: session.user.id },
+      select: { id: true }
+    });
+
+    const userStartupIds = userStartups.map(startup => startup.id);
+    const hasAdminAccess = session.user.permissions?.includes("ADMIN_ACCESS");
+    
+    // Check if user owns this startup or has admin access
+    if (!hasAdminAccess && !userStartupIds.includes(existingJob.startupId)) {
+      return NextResponse.json(
+        { error: "You don't have permission to edit this job" },
+        { status: 403 }
+      );
+    }
+
+    // Parse and validate the request body
+    const body = await req.json();
+    const validationResult = updateJobSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validationResult.error.format() },
+        { status: 400 }
+      );
+    }
+
+    const data = validationResult.data;
+
+    // Update the job
+    const updatedJob = await db.job.update({
+      where: { id: jobId },
+      data: {
+        title: data.title,
+        type: data.type,
+        experienceLevel: data.experienceLevel,
+        location: data.location,
+        salary: data.salary,
+        description: data.description,
+        requirements: data.requirements,
+        responsibilities: data.responsibilities,
+        skills: data.skills,
+        department: data.department,
+        status: "active", // You might want to make this configurable
+        updatedAt: new Date(),
+      },
+      include: {
+        startup: {
+          select: {
+            name: true,
+            logo: true,
+            country: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(updatedJob);
+  } catch (error) {
+    console.error("Error updating job:", error);
+    return NextResponse.json(
+      { error: "Failed to update job" },
       { status: 500 }
     );
   }

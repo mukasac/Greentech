@@ -10,6 +10,24 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export default function EventsPage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<{
+    region: string | null;
+    type: string | null;
+    dateRange: string | null;
+  }>({
+    region: null,
+    type: null,
+    dateRange: null,
+  });
+
+  // Handler function for filter changes
+  const handleFilterChange = (type: string, value: string | null) => {
+    setActiveFilters(prev => ({
+      ...prev,
+      [type]: value
+    }));
+    // You might want to add additional logic here, like fetching filtered events
+  };
 
   return (
     <div className="container py-4 md:py-8">
@@ -39,15 +57,15 @@ export default function EventsPage() {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-semibold text-lg">Filters</h3>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => setIsFiltersOpen(false)}
+                <Button
+                   variant="ghost"
+                   size="icon"
+                   onClick={() => setIsFiltersOpen(false)}
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <EventFilters />
+              <EventFilters onFilterChange={handleFilterChange} />
             </div>
           </SheetContent>
         </Sheet>
@@ -55,7 +73,7 @@ export default function EventsPage() {
 
       <div className="grid gap-6 lg:gap-8 lg:grid-cols-[250px_1fr]">
         <aside className="hidden lg:block sticky top-4 self-start">
-          <EventFilters />
+          <EventFilters onFilterChange={handleFilterChange} />
         </aside>
 
         <main>

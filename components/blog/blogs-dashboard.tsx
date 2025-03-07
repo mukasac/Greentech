@@ -5,11 +5,13 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, Calendar, Eye, Clock, Edit, Trash2 } from "lucide-react";
+import { Plus, Loader2, Calendar, Eye, Clock, Edit, Trash2, PenLine } from "lucide-react";
 import Link from "next/link";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
 interface BlogPost {
   id: string;
@@ -32,7 +34,11 @@ export function BlogsDashboard() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { hasPermission } = usePermissions();
+  const router = useRouter();
 
   useEffect(() => {
     fetchPosts();
@@ -40,6 +46,7 @@ export function BlogsDashboard() {
 
   const fetchPosts = async () => {
     try {
+      setLoading(true);
       const response = await fetch('/api/blogs');
       if (!response.ok) throw new Error('Failed to fetch blog posts');
       const data = await response.json();
@@ -51,21 +58,31 @@ export function BlogsDashboard() {
     }
   };
 
-  const handleDelete = async (postId: string) => {
-    if (!confirm('Are you sure you want to delete this post?')) return;
+  const handleDeleteClick = (postId: string) => {
+    setPostToDelete(postId);
+    setDeleteDialogOpen(true);
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!postToDelete) return;
+    
     try {
-      const response = await fetch(`/api/blogs/${postId}`, {
+      setIsDeleting(true);
+      const response = await fetch(`/api/blogs/${postToDelete}`, {
         method: 'DELETE'
       });
 
       if (!response.ok) throw new Error('Failed to delete post');
       
-      // Refresh posts list
-      fetchPosts();
+      // Remove deleted post from state
+      setPosts(prevPosts => prevPosts.filter(post => post.id !== postToDelete));
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
     } catch (error) {
       console.error('Error deleting post:', error);
-      alert('Failed to delete post');
+      setError('Failed to delete post');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -102,6 +119,7 @@ export function BlogsDashboard() {
       {posts.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
+            <PenLine className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-lg font-medium">No Blog Posts Yet</p>
             <p className="text-muted-foreground">Share your startup journey by creating your first post</p>
             {hasPermission("CREATE_BLOG") && (
@@ -122,7 +140,9 @@ export function BlogsDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge>{post.status}</Badge>
+                      <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>
+                        {post.status}
+                      </Badge>
                       {post.tags.slice(0, 2).map(tag => (
                         <Badge key={tag} variant="outline">{tag}</Badge>
                       ))}
@@ -167,7 +187,7 @@ export function BlogsDashboard() {
                         View
                       </Link>
                     </Button>
-                    {hasPermission("EDIT_BLOG") && (
+                    {hasPermission("UPDATE_BLOG") && (
                       <>
                         <Button variant="outline" size="sm" asChild>
                           <Link href={`/startups/dashboard/blog/${post.id}/edit`}>
@@ -178,7 +198,7 @@ export function BlogsDashboard() {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleDelete(post.id)}
+                          onClick={() => handleDeleteClick(post.id)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -191,6 +211,31 @@ export function BlogsDashboard() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this blog post? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={isDeleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting}>
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

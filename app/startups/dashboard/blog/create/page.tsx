@@ -85,7 +85,8 @@ export default function CreateBlogPostPage() {
         throw new Error(errorData.error || 'Failed to create blog post');
       }
 
-      router.push('/startups/dashboard/blog');
+      // Updated redirect to go to the blogs tab in dashboard/profile
+      router.push('/startups/dashboard/profile?tab=blog');
     } catch (err) {
       console.error('Error saving blog post:', err);
       setError(err instanceof Error ? err.message : 'Failed to save blog post');

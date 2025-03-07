@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowLeft, AlertCircle, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface AddTeamMemberFormProps {
   startupId: string;
@@ -59,9 +60,9 @@ export function AddTeamMemberForm({ startupId }: AddTeamMemberFormProps) {
 
       setSuccess("Team member added successfully!");
       
-      // Redirect after a short delay
+      // Redirect after a short delay to the team tab in dashboard profile
       setTimeout(() => {
-        router.push("/startups/dashboard/team");
+        router.push("/startups/dashboard/profile?tab=team");
         router.refresh();
       }, 2000);
     } catch (error) {
@@ -136,11 +137,13 @@ export function AddTeamMemberForm({ startupId }: AddTeamMemberFormProps) {
                   required
                 />
                 {formData.image && (
-                  <div className="mt-2 h-20 w-20 overflow-hidden rounded-full border">
-                    <img 
+                  <div className="mt-2 h-20 w-20 overflow-hidden rounded-full border relative">
+                    <Image 
                       src={formData.image} 
                       alt="Profile preview" 
-                      className="h-full w-full object-cover"
+                      fill
+                      sizes="80px"
+                      style={{objectFit: "cover"}}
                     />
                   </div>
                 )}

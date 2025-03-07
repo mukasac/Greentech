@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import  JobPostingForm  from "@/components/jobs/forms/job-posting-form";
+import JobPostingForm from "@/components/jobs/forms/job-posting-form";
 import { DashboardSidebar } from "@/components/startups/dashboard/sidebar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
@@ -16,7 +16,6 @@ export default function CreateJobPage() {
   const params = useParams();
   const startupId = params.id as string;
   const { data: session, status } = useSession();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [startup, setStartup] = useState<Startup | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,89 +51,33 @@ export default function CreateJobPage() {
     }
   }, [status, router, startupId]);
 
-  // Create a server action URL that includes the startup ID
-  const getActionUrl = () => `/api/jobs/create?startupId=${startupId}`;
+  // Handlers for JobPostingForm
+  const handleSuccess = () => {
+    setSuccess("Job posted successfully!");
+    // Redirect after a short delay
+    setTimeout(() => {
+      router.push(`/startups/${startupId}/jobs`);
+    }, 2000);
+  };
+  
+  const handleError = (message: string) => {
+    setError(message);
+  };
 
   // Setup an event listener for the custom form submission event
   useEffect(() => {
     const handleFormSubmission = async (event: any) => {
       if (!event.detail) return;
       
-      setIsSubmitting(true);
       setError(null);
       setJobData(event.detail);
-
-      try {
-        // Format the data
-        const requirements = event.detail.requirements
-          .split('\n')
-          .filter((req: string) => req.trim().length > 0);
-        
-        const responsibilities = event.detail.responsibilities
-          .split('\n')
-          .filter((resp: string) => resp.trim().length > 0);
-        
-        const skills = event.detail.skills
-          .split(',')
-          .map((skill: string) => skill.trim())
-          .filter((skill: string) => skill.length > 0);
-
-        const jobData = {
-          title: event.detail.title,
-          type: event.detail.type,
-          experienceLevel: event.detail.experienceLevel,
-          location: {
-            type: event.detail.locationType,
-            city: event.detail.city || null,
-            country: event.detail.country,
-          },
-          salary: {
-            min: event.detail.salaryMin,
-            max: event.detail.salaryMax,
-            currency: event.detail.currency,
-          },
-          description: event.detail.description,
-          requirements,
-          responsibilities,
-          skills,
-          department: event.detail.department,
-          startup: {
-            id: startupId
-          },
-          applicationUrl: `${window.location.origin}/jobs/apply/${startupId}/${Date.now()}`,
-          status: "active",
-        };
-
-        const response = await fetch("/api/jobs", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(jobData),
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || "Failed to create job posting");
-        }
-
-        setSuccess("Job posted successfully!");
-        
-        // Redirect after a short delay
-        setTimeout(() => {
-          router.push(`/startups/${startupId}/jobs`);
-        }, 2000);
-      } catch (error) {
-        console.error("Job posting error:", error);
-        setError(error instanceof Error ? error.message : "Failed to create job posting");
-      } finally {
-        setIsSubmitting(false);
-      }
+      
+      // This part is now handled by the JobPostingForm component itself
     };
 
     window.addEventListener('jobFormSubmit', handleFormSubmission);
     return () => window.removeEventListener('jobFormSubmit', handleFormSubmission);
-  }, [startupId, router]);
+  }, []);
 
   if (status === "loading" || loading) {
     return (
@@ -151,7 +94,7 @@ export default function CreateJobPage() {
           <CardContent className="py-12 text-center">
             <h2 className="mb-2 text-xl font-semibold">Startup Not Found</h2>
             <p className="text-muted-foreground">
-              The startup you are trying to create a job for does not exist or you dont have access to it.
+              The startup you are trying to create a job for does not exist or you do not have access to it.
             </p>
           </CardContent>
         </Card>
@@ -192,9 +135,9 @@ export default function CreateJobPage() {
           )}
 
           <JobPostingForm 
-            action={getActionUrl()}
-            isSubmitting={isSubmitting}
             startupId={startupId}
+            onSuccess={handleSuccess}
+            onError={handleError}
           />
           
           {Object.keys(jobData).length > 0 && (

@@ -7,8 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ArrowLeft, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog";
+import { ArrowLeft, AlertCircle, CheckCircle, Loader2, Trash2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface TeamMember {
   id: string;
@@ -28,6 +39,8 @@ export function EditTeamMemberForm({ startupId, memberId }: EditTeamMemberFormPr
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   
@@ -93,15 +106,44 @@ export function EditTeamMemberForm({ startupId, memberId }: EditTeamMemberFormPr
 
       setSuccess("Team member updated successfully!");
       
-      // Redirect after a short delay
+      // Redirect after a short delay to the team tab in dashboard profile
       setTimeout(() => {
-        router.push("/startups/dashboard/team");
+        router.push("/startups/dashboard/profile?tab=team");
+        router.refresh();
       }, 2000);
     } catch (error) {
       console.error("Error updating team member:", error);
       setError(error instanceof Error ? error.message : "Failed to update team member");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/startups/${startupId}/team/${memberId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete team member");
+      }
+
+      setSuccess("Team member deleted successfully!");
+      
+      // Redirect after a short delay
+      setTimeout(() => {
+        router.push("/startups/dashboard/profile?tab=team");
+        router.refresh();
+      }, 2000);
+    } catch (error) {
+      console.error("Error deleting team member:", error);
+      setError(error instanceof Error ? error.message : "Failed to delete team member");
+      setIsDeleting(false);
     }
   };
 
@@ -121,7 +163,7 @@ export function EditTeamMemberForm({ startupId, memberId }: EditTeamMemberFormPr
       <div className="mx-auto max-w-2xl">
         <div className="mb-6">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/startups/dashboard/team">
+            <Link href="/startups/dashboard/profile?tab=team">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Team
             </Link>
@@ -180,11 +222,13 @@ export function EditTeamMemberForm({ startupId, memberId }: EditTeamMemberFormPr
                   required
                 />
                 {formData.image && (
-                  <div className="mt-2 h-20 w-20 overflow-hidden rounded-full border">
-                    <img 
+                  <div className="mt-2 h-20 w-20 overflow-hidden rounded-full border relative">
+                    <Image 
                       src={formData.image} 
                       alt={formData.name} 
-                      className="h-full w-full object-cover"
+                      fill
+                      sizes="80px"
+                      style={{objectFit: "cover"}}
                     />
                   </div>
                 )}
@@ -214,17 +258,51 @@ export function EditTeamMemberForm({ startupId, memberId }: EditTeamMemberFormPr
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-4">
-                <Button type="button" variant="outline" asChild>
-                  <Link href="/startups/dashboard/team">Cancel</Link>
+              <div className="flex justify-between space-x-4">
+                <Button 
+                  type="button" 
+                  variant="destructive" 
+                  onClick={() => setDeleteDialogOpen(true)}
+                  disabled={isSubmitting || isDeleting}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Member
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Updating..." : "Update Team Member"}
-                </Button>
+                
+                <div className="flex space-x-4">
+                  <Button type="button" variant="outline" asChild>
+                    <Link href="/startups/dashboard/team">Cancel</Link>
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting || isDeleting}>
+                    {isSubmitting ? "Updating..." : "Update Team Member"}
+                  </Button>
+                </div>
               </div>
             </form>
           </CardContent>
         </Card>
+        
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete the team member. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDelete} 
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
