@@ -22,6 +22,7 @@ async function clearDatabase() {
     prisma.news.deleteMany(),
     prisma.analyticsEvent.deleteMany(),
     prisma.climateImpact.deleteMany(),
+    prisma.startupCategory.deleteMany(),
     
     // Then delete parent tables
     prisma.startup.deleteMany(),

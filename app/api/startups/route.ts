@@ -106,7 +106,7 @@ export async function POST(req: Request) {
       startupStage = "",
       investmentStage = "",
       fundingNeeds = "",
-      stage = "",  // Legacy field for backward compatibility
+      // Remove stage field from here
       mainCategory, // This will be handled separately for the category relation
       subcategories = [],
       country = "norway", // Default to Norway if not provided
@@ -134,7 +134,7 @@ export async function POST(req: Request) {
           startupStage,
           investmentStage, 
           fundingNeeds,
-          stage,  // Legacy field
+          // Remove stage field from here
           country,
           tags,
           userId: session.user.id,

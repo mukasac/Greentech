@@ -262,19 +262,35 @@ model AnalyticsEvent {
 model ClimateImpact {
   id                String   @id @default(cuid())
   isActive          Boolean  @default(true)
+  
+  // Impact Metrics with descriptions
   co2Reduction      Float?
+  co2ReductionDescription String?
   waterSaved        Float?
+  waterSavedDescription String?
   energyEfficiency  Float?
+  energyEfficiencyDescription String?
   wasteDiverted     Float?
+  wasteDivertedDescription String?
   biodiversityImpact String?  @db.Text
+  
+  // Carbon Footprint with descriptions
   carbonCaptured    Float?
+  carbonCapturedDescription String?
   lifecycleCo2Reduction Float?
+  lifecycleCo2ReductionDescription String?
   offsetPrograms    String?  @db.Text
+  
+  // SDGs and certifications
   sdgs              Int[]
   sdgImpact         String?  @db.Text
   certifications    String[]
   awards            String?  @db.Text
+  
+  // Lifecycle data stored as JSON (includes descriptions)
   lifecycle         Json?
+  
+  // Relations
   startupId         String
   startup           Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
   createdAt         DateTime @default(now())

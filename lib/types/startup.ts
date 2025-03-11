@@ -164,13 +164,16 @@ export interface ImpactMetrics {
 
 // Updated Lifecycle Impact Interface
 export interface LifecycleImpact {
-  // Core metrics (original ones)
   circularity?: number;
+  circularityDescription?: string;
   recycledMaterials?: number;
+  recycledMaterialsDescription?: string;
   wasteReduction?: number;
+  wasteReductionDescription?: string;
   supplyChainReduction?: number;
+  supplyChainReductionDescription?: string;
   description?: string;
-  
+
   // Materials & Design
   repairabilityScore?: number;
   designForDisassembly?: number;
@@ -217,35 +220,79 @@ export interface LifecycleImpact {
   socialLCAMetrics?: string;
 }
 
+// New interface to handle metrics property
+export interface ClimateImpactMetrics {
+  // Core metrics
+  co2Reduction?: number;
+  co2ReductionDescription?: string;
+  waterSaved?: number;
+  waterSavedDescription?: string;
+  energyEfficiency?: number;
+  energyEfficiencyDescription?: string;
+  wasteDiverted?: number;
+  wasteDivertedDescription?: string;
+  biodiversityImpact?: string;
+  biodiversityImpactDescription?: string;
+  airQualityImprovement?: number;
+  airQualityImprovementDescription?: string;
+  landAreaPreserved?: number;
+  landAreaPreservedDescription?: string;
+  
+  // Emissions & Energy
+  renewableEnergyGenerated?: number;
+  renewableEnergyGeneratedDescription?: string;
+  ghgEmissions?: number;
+  ghgEmissionsDescription?: string;
+  digitalSustainability?: string;
+  digitalSustainabilityDescription?: string;
+  
+  // Water & Resources
+  waterQualityImprovement?: number;
+  waterQualityImprovementDescription?: string;
+  resourceEfficiency?: number;
+  resourceEfficiencyDescription?: string;
+  plasticReduction?: number;
+  plasticReductionDescription?: string;
+  
+  // Additional metrics may be added as needed
+  [key: string]: string | number | undefined;
+}
+
 // Updated Climate Impact interface
 export interface ClimateImpact {
   id: string;
   isActive: boolean;
   
-  // Impact Metrics - can use both specific fields and the metrics object
+  // New property for structured metrics
+  metrics?: ClimateImpactMetrics;
+  
+  // Impact Metrics
   co2Reduction?: number;
+  co2ReductionDescription?: string;
   waterSaved?: number;
+  waterSavedDescription?: string;
   energyEfficiency?: number;
+  energyEfficiencyDescription?: string;
   wasteDiverted?: number;
+  wasteDivertedDescription?: string;
   biodiversityImpact?: string;
-  
-  // Full metrics object for comprehensive data
-  metrics?: ImpactMetrics;
-  
+
   // Carbon Footprint
   carbonCaptured?: number;
+  carbonCapturedDescription?: string;
   lifecycleCo2Reduction?: number;
+  lifecycleCo2ReductionDescription?: string;
   offsetPrograms?: string;
-  
+
   // SDGs and Certifications
   sdgs: number[];
   sdgImpact?: string;
   certifications: string[];
   awards?: string;
-  
-  // Lifecycle Impact - can use both specific fields and the lifecycle object
+
+  // Lifecycle Impact
   lifecycle?: LifecycleImpact;
-  
+
   startupId: string;
   createdAt: Date;
   updatedAt: Date;

@@ -41,6 +41,7 @@ interface MetricInfo {
   label: string;
   unit: string;
   type: string;
+  tooltip?: string; // Added tooltip field for metric explanations
 }
 
 interface MetricsCollection {
@@ -63,7 +64,9 @@ interface ClimateImpactFormProps {
     metrics?: Record<string, any>;
     // Flat structure instead of nested carbonFootprint
     carbonCaptured?: number;
+    carbonCapturedDescription?: string;
     lifecycleCo2Reduction?: number;
+    lifecycleCo2ReductionDescription?: string;
     offsetPrograms?: string;
     sdgs?: number[];
     sdgImpact?: string;
@@ -73,54 +76,101 @@ interface ClimateImpactFormProps {
   };
 }
 
+// Tooltip descriptions for metrics
+const metricTooltips = {
+  // Emissions & Energy
+  co2Reduction: "Total greenhouse gas emissions reduced or avoided annually, measured in metric tons of CO2 equivalent. Include both direct and indirect reductions.",
+  energyEfficiency: "Percentage improvement in energy usage compared to conventional alternatives or previous versions. Higher percentages indicate better efficiency.",
+  renewableEnergyGenerated: "Amount of clean energy produced annually through solar, wind, hydro, or other renewable sources, measured in kilowatt-hours.",
+  ghgEmissions: "Greenhouse gas emissions broken down by scope (1, 2, and 3) according to the GHG Protocol, measured in tons of CO2 equivalent.",
+  digitalSustainability: "Measures taken to reduce the environmental impact of digital operations, including server efficiency, data center practices, and software optimization.",
+  
+  // Water & Resources
+  waterSaved: "Total volume of water conserved or recycled annually compared to industry standards or previous operations, measured in liters.",
+  wasteDiverted: "Amount of waste diverted from landfills through recycling, reuse, or other waste management strategies, measured in metric tons.",
+  waterQualityImprovement: "Percentage improvement in water quality parameters such as pH, turbidity, dissolved oxygen, or contaminant levels.",
+  resourceEfficiency: "Percentage improvement in the use of raw materials, energy, or other resources per unit of production or service.",
+  plasticReduction: "Amount of plastic waste reduced or prevented annually through redesign, material substitution, or elimination, measured in metric tons.",
+  
+  // Biodiversity & Land
+  biodiversityImpact: "Qualitative and quantitative effects on local and global biodiversity, including species diversity, habitat conditions, and ecosystem health.",
+  landAreaPreserved: "Total land area conserved, preserved, or restored through conservation initiatives, measured in hectares.",
+  habitatCreation: "Size and quality of habitats created or restored for wildlife, including natural corridors and protected areas.",
+  speciesProtected: "Number of endangered or threatened species protected through conservation efforts or habitat protection.",
+  soilHealthImprovement: "Improvement in soil quality metrics such as organic matter content, fertility, structure, or microbial activity, measured in hectares.",
+  desertificationPrevention: "Area of land protected from becoming desert through sustainable land management practices.",
+  ecosystemServicesValue: "Economic value of ecosystem services provided, such as carbon sequestration, water purification, or pollination.",
+  
+  // Social & Health
+  healthcareImpacts: "Positive impacts on human health metrics, including reduced pollution exposure, improved water quality, or enhanced food security.",
+  socialImpactMetrics: "Metrics related to social benefits, such as jobs created, communities supported, or quality of life improvements.",
+  environmentalJusticeMetrics: "Measures of how environmental benefits and burdens are distributed across different communities, particularly marginalized ones.",
+  
+  // Pollution Reduction
+  airQualityImprovement: "Reduction in air pollutants such as particulate matter, nitrogen oxides, or volatile organic compounds, measured in parts per million.",
+  chemicalPollutionReduction: "Reduction in hazardous chemicals released to air, water, or soil, measured in metric tons.",
+  noisePollutionReduction: "Reduction in noise levels, measured in decibels, in affected areas.",
+  
+  // Carbon specific
+  carbonCaptured: "Total amount of CO2 actively sequestered or captured annually through technological or nature-based solutions, measured in metric tons.",
+  lifecycleCo2Reduction: "Percentage reduction in CO2 emissions across the entire product lifecycle compared to conventional alternatives or previous versions.",
+  
+  // Lifecycle related
+  circularity: "Percentage of materials or components that are recycled, reused, or biodegradable in your products or operations.",
+  recycledMaterials: "Percentage of materials used in your products or operations that come from recycled sources.",
+  wasteReduction: "Percentage reduction in waste generated compared to previous operations or industry standards.",
+  supplyChainReduction: "Percentage reduction in environmental impact throughout your supply chain through optimization or better sourcing.",
+  productLifespan: "Average useful life of products in years, including any extensions through repair, refurbishment, or upgrading."
+};
+
 // Define Impact Metrics categories
 const impactMetricsCategories: CategoriesCollection = {
   "emissions-energy": {
     label: "Emissions & Energy",
     metrics: {
-      co2Reduction: { label: "CO₂ Reduction", unit: "tons/year", type: "number" },
-      energyEfficiency: { label: "Energy Efficiency Improvement", unit: "%", type: "number" },
-      renewableEnergyGenerated: { label: "Renewable Energy Generated", unit: "kWh/year", type: "number" },
-      ghgEmissions: { label: "GHG Emissions by Scope", unit: "tCO₂e", type: "number" },
-      digitalSustainability: { label: "Digital Sustainability", unit: "", type: "text" },
+      co2Reduction: { label: "CO₂ Reduction", unit: "tons/year", type: "number", tooltip: metricTooltips.co2Reduction },
+      energyEfficiency: { label: "Energy Efficiency Improvement", unit: "%", type: "number", tooltip: metricTooltips.energyEfficiency },
+      renewableEnergyGenerated: { label: "Renewable Energy Generated", unit: "kWh/year", type: "number", tooltip: metricTooltips.renewableEnergyGenerated },
+      ghgEmissions: { label: "GHG Emissions by Scope", unit: "tCO₂e", type: "number", tooltip: metricTooltips.ghgEmissions },
+      digitalSustainability: { label: "Digital Sustainability", unit: "", type: "text", tooltip: metricTooltips.digitalSustainability },
     }
   },
   "water-resources": {
     label: "Water & Resources",
     metrics: {
-      waterSaved: { label: "Water Saved", unit: "L/year", type: "number" },
-      wasteDiverted: { label: "Waste Diverted", unit: "tons/year", type: "number" },
-      waterQualityImprovement: { label: "Water Quality Improvement", unit: "%", type: "number" },
-      resourceEfficiency: { label: "Resource Efficiency", unit: "%", type: "number" },
-      plasticReduction: { label: "Plastic Reduction", unit: "tons/year", type: "number" },
+      waterSaved: { label: "Water Saved", unit: "L/year", type: "number", tooltip: metricTooltips.waterSaved },
+      wasteDiverted: { label: "Waste Diverted", unit: "tons/year", type: "number", tooltip: metricTooltips.wasteDiverted },
+      waterQualityImprovement: { label: "Water Quality Improvement", unit: "%", type: "number", tooltip: metricTooltips.waterQualityImprovement },
+      resourceEfficiency: { label: "Resource Efficiency", unit: "%", type: "number", tooltip: metricTooltips.resourceEfficiency },
+      plasticReduction: { label: "Plastic Reduction", unit: "tons/year", type: "number", tooltip: metricTooltips.plasticReduction },
     }
   },
   "biodiversity-land": {
     label: "Biodiversity & Land",
     metrics: {
-      biodiversityImpact: { label: "Biodiversity Impact", unit: "", type: "textarea" },
-      landAreaPreserved: { label: "Land Area Preserved/Restored", unit: "hectares", type: "number" },
-      habitatCreation: { label: "Habitat Creation", unit: "area", type: "text" },
-      speciesProtected: { label: "Species Protected", unit: "count", type: "number" },
-      soilHealthImprovement: { label: "Soil Health Improvement", unit: "hectares", type: "number" },
-      desertificationPrevention: { label: "Desertification Prevention", unit: "area", type: "text" },
-      ecosystemServicesValue: { label: "Ecosystem Services Value", unit: "currency", type: "number" },
+      biodiversityImpact: { label: "Biodiversity Impact", unit: "", type: "textarea", tooltip: metricTooltips.biodiversityImpact },
+      landAreaPreserved: { label: "Land Area Preserved/Restored", unit: "hectares", type: "number", tooltip: metricTooltips.landAreaPreserved },
+      habitatCreation: { label: "Habitat Creation", unit: "area", type: "text", tooltip: metricTooltips.habitatCreation },
+      speciesProtected: { label: "Species Protected", unit: "count", type: "number", tooltip: metricTooltips.speciesProtected },
+      soilHealthImprovement: { label: "Soil Health Improvement", unit: "hectares", type: "number", tooltip: metricTooltips.soilHealthImprovement },
+      desertificationPrevention: { label: "Desertification Prevention", unit: "area", type: "text", tooltip: metricTooltips.desertificationPrevention },
+      ecosystemServicesValue: { label: "Ecosystem Services Value", unit: "currency", type: "number", tooltip: metricTooltips.ecosystemServicesValue },
     }
   },
   "social-health": {
     label: "Social & Health",
     metrics: {
-      healthcareImpacts: { label: "Healthcare Impacts", unit: "", type: "textarea" },
-      socialImpactMetrics: { label: "Social Impact Metrics", unit: "", type: "textarea" },
-      environmentalJusticeMetrics: { label: "Environmental Justice Metrics", unit: "", type: "textarea" },
+      healthcareImpacts: { label: "Healthcare Impacts", unit: "", type: "textarea", tooltip: metricTooltips.healthcareImpacts },
+      socialImpactMetrics: { label: "Social Impact Metrics", unit: "", type: "textarea", tooltip: metricTooltips.socialImpactMetrics },
+      environmentalJusticeMetrics: { label: "Environmental Justice Metrics", unit: "", type: "textarea", tooltip: metricTooltips.environmentalJusticeMetrics },
     }
   },
   "pollution-reduction": {
     label: "Pollution Reduction",
     metrics: {
-      airQualityImprovement: { label: "Air Quality Improvement", unit: "ppm", type: "number" },
-      chemicalPollutionReduction: { label: "Chemical Pollution Reduction", unit: "tons/year", type: "number" },
-      noisePollutionReduction: { label: "Noise Pollution Reduction", unit: "dB", type: "number" },
+      airQualityImprovement: { label: "Air Quality Improvement", unit: "ppm", type: "number", tooltip: metricTooltips.airQualityImprovement },
+      chemicalPollutionReduction: { label: "Chemical Pollution Reduction", unit: "tons/year", type: "number", tooltip: metricTooltips.chemicalPollutionReduction },
+      noisePollutionReduction: { label: "Noise Pollution Reduction", unit: "dB", type: "number", tooltip: metricTooltips.noisePollutionReduction },
     }
   },
   "other-impacts": {
@@ -139,14 +189,13 @@ const impactMetricsCategories: CategoriesCollection = {
     }
   },
 };
-
 // Define Lifecycle Sustainability Impact categories
 const lifecycleCategories: CategoriesCollection = {
   "materials-design": {
     label: "Materials & Design",
     metrics: {
-      circularity: { label: "Circularity", unit: "%", type: "number" },
-      recycledMaterials: { label: "Recycled Materials", unit: "%", type: "number" },
+      circularity: { label: "Circularity", unit: "%", type: "number", tooltip: metricTooltips.circularity },
+      recycledMaterials: { label: "Recycled Materials", unit: "%", type: "number", tooltip: metricTooltips.recycledMaterials },
       repairabilityScore: { label: "Repairability Score", unit: "%", type: "number" },
       designForDisassembly: { label: "Design for Disassembly", unit: "%", type: "number" },
       biodegradableMaterials: { label: "Biodegradable Materials", unit: "%", type: "number" },
@@ -169,7 +218,7 @@ const lifecycleCategories: CategoriesCollection = {
   "supply-chain": {
     label: "Supply Chain & Distribution",
     metrics: {
-      supplyChainReduction: { label: "Supply Chain Reduction", unit: "%", type: "number" },
+      supplyChainReduction: { label: "Supply Chain Reduction", unit: "%", type: "number", tooltip: metricTooltips.supplyChainReduction },
       materialSourcingEthics: { label: "Material Sourcing Ethics", unit: "%", type: "number" },
       supplyChainTransparency: { label: "Supply Chain Transparency", unit: "%", type: "number" },
       conflictMineralsPolicy: { label: "Conflict Minerals Policy", unit: "", type: "text" },
@@ -181,7 +230,7 @@ const lifecycleCategories: CategoriesCollection = {
   "use-performance": {
     label: "Product Use & Performance",
     metrics: {
-      productLifespan: { label: "Product Lifespan", unit: "years", type: "number" },
+      productLifespan: { label: "Product Lifespan", unit: "years", type: "number", tooltip: metricTooltips.productLifespan },
       productCarbonFootprint: { label: "Product Carbon Footprint", unit: "CO₂e/unit", type: "number" },
       waterFootprintOfProduct: { label: "Water Footprint of Product", unit: "L/unit", type: "number" },
       durabilityTestingResults: { label: "Durability Testing Results", unit: "", type: "textarea" },
@@ -191,7 +240,7 @@ const lifecycleCategories: CategoriesCollection = {
   "end-of-life": {
     label: "End-of-Life & Circularity",
     metrics: {
-      wasteReduction: { label: "Waste Reduction", unit: "%", type: "number" },
+      wasteReduction: { label: "Waste Reduction", unit: "%", type: "number", tooltip: metricTooltips.wasteReduction },
       endOfLifeRecoveryRate: { label: "End-of-Life Recovery Rate", unit: "%", type: "number" },
       takeBackPrograms: { label: "Take-Back Programs", unit: "", type: "textarea" },
       remanufacturingCapability: { label: "Remanufacturing Capability", unit: "%", type: "number" },
@@ -220,7 +269,6 @@ export function ClimateImpactForm({
   initialData = {}
 }: ClimateImpactFormProps) {
   const { data: session } = useSession();
-  const hasPermission = session?.user?.permissions?.includes("MANAGE_CLIMATE_IMPACT");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -237,6 +285,10 @@ export function ClimateImpactForm({
         metrics[key] = initialData?.metrics?.[key] ?? 
           (category.metrics[key].type === "number" ? 0 : 
            category.metrics[key].type === "textarea" ? "" : "");
+        
+        // Initialize description fields
+        const descKey = `${key}Description`;
+        metrics[descKey] = initialData?.metrics?.[descKey] ?? "";
       });
     });
     
@@ -246,6 +298,10 @@ export function ClimateImpactForm({
         lifecycle[key] = initialData?.lifecycle?.[key] ?? 
           (category.metrics[key].type === "number" ? 0 : 
            category.metrics[key].type === "textarea" ? "" : "");
+        
+        // Initialize description fields
+        const descKey = `${key}Description`;
+        lifecycle[descKey] = initialData?.lifecycle?.[descKey] ?? "";
       });
     });
     
@@ -253,7 +309,9 @@ export function ClimateImpactForm({
       metrics,
       // Flat carbon footprint properties instead of nested
       carbonCaptured: initialData?.carbonCaptured || 0,
+      carbonCapturedDescription: initialData?.carbonCapturedDescription || "",
       lifecycleCo2Reduction: initialData?.lifecycleCo2Reduction || 0,
+      lifecycleCo2ReductionDescription: initialData?.lifecycleCo2ReductionDescription || "",
       offsetPrograms: initialData?.offsetPrograms || "",
       sdgs: initialData?.sdgs || [],
       sdgImpact: initialData?.sdgImpact || "",
@@ -262,18 +320,6 @@ export function ClimateImpactForm({
       lifecycle,
     };
   });
-
-  if (!hasPermission) {
-    return (
-      <Alert>
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Permission Required</AlertTitle>
-        <AlertDescription>
-          You dont have permission to manage climate impact data. Please contact your administrator.
-        </AlertDescription>
-      </Alert>
-    );
-  }
 
   const handleMetricsChange = (field: string, value: string | number) => {
     setFormData(prev => ({
@@ -397,6 +443,12 @@ export function ClimateImpactForm({
     const value = section === "metrics" ? formData.metrics[metricKey] : formData.lifecycle[metricKey];
     const handleChange = section === "metrics" ? handleMetricsChange : handleLifecycleChange;
     
+    // Get description value and handler
+    const descriptionKey = `${metricKey}Description`;
+    const descriptionValue = section === "metrics" ? 
+      formData.metrics[descriptionKey] : 
+      formData.lifecycle[descriptionKey];
+    
     const metricIconData = getMetricIcon(metricKey);
     
     return (
@@ -412,16 +464,18 @@ export function ClimateImpactForm({
             {metricInfo.label}
             {metricInfo.unit && <span className="text-muted-foreground ml-1">({metricInfo.unit})</span>}
           </Label>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Info className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs">Information about how to measure {metricInfo.label}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          {metricInfo.tooltip && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">{metricInfo.tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           {isCoreMetric(metricKey) && (
             <Badge variant="outline" className="ml-2">Core</Badge>
           )}
@@ -449,6 +503,21 @@ export function ClimateImpactForm({
             onChange={(e) => handleChange(metricKey, e.target.value)}
           />
         )}
+        
+        {/* Add description field for each metric */}
+        <div className="pt-1">
+          <Label htmlFor={descriptionKey} className="text-sm text-muted-foreground mb-1">
+            Description (optional)
+          </Label>
+          <Textarea
+            id={descriptionKey}
+            value={descriptionValue as string}
+            onChange={(e) => handleChange(descriptionKey, e.target.value)}
+            placeholder={`Add context or details about ${metricInfo.label}...`}
+            className="mt-1"
+            rows={2}
+          />
+        </div>
       </div>
     );
   };
@@ -539,7 +608,7 @@ export function ClimateImpactForm({
         </CardContent>
       </Card>
 
-      {/* Carbon Footprint Section - Updated to use flat structure with colored icons */}
+      {/* Carbon Footprint Section - Updated to use flat structure with colored icons and descriptions */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -554,32 +623,69 @@ export function ClimateImpactForm({
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="carbonCaptured" className="flex items-center">
-                <ColoredIcon 
-                  icon={getMetricIcon("carbonCaptured").icon} 
-                  color={getMetricIcon("carbonCaptured").color} 
-                  className="mr-2" 
-                  size={16} 
-                />
-                Carbon Captured (tons/year)
-              </Label>
+              <div className="flex items-center">
+                <Label htmlFor="carbonCaptured" className="flex items-center flex-1">
+                  <ColoredIcon 
+                    icon={getMetricIcon("carbonCaptured").icon} 
+                    color={getMetricIcon("carbonCaptured").color} 
+                    className="mr-2" 
+                    size={16} 
+                  />
+                  Carbon Captured (tons/year)
+                </Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">{metricTooltips.carbonCaptured}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <Input
                 id="carbonCaptured"
                 type="number"
                 value={formData.carbonCaptured}
                 onChange={(e) => handleCarbonFootprintChange("carbonCaptured", Number(e.target.value))}
               />
+              <div className="pt-1">
+                <Label htmlFor="carbonCapturedDescription" className="text-sm text-muted-foreground mb-1">
+                  Description (optional)
+                </Label>
+                <Textarea
+                  id="carbonCapturedDescription"
+                  value={formData.carbonCapturedDescription}
+                  onChange={(e) => handleCarbonFootprintChange("carbonCapturedDescription", e.target.value)}
+                  placeholder="Add context or details about carbon capture..."
+                  className="mt-1"
+                  rows={2}
+                />
+              </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lifecycleCo2Reduction" className="flex items-center">
-                <ColoredIcon 
-                  icon={getMetricIcon("lifecycleCo2Reduction").icon} 
-                  color={getMetricIcon("lifecycleCo2Reduction").color} 
-                  className="mr-2" 
-                  size={16} 
-                />
-                Lifecycle CO₂ Reduction (%)
-              </Label>
+              <div className="flex items-center">
+                <Label htmlFor="lifecycleCo2Reduction" className="flex items-center flex-1">
+                  <ColoredIcon 
+                    icon={getMetricIcon("lifecycleCo2Reduction").icon} 
+                    color={getMetricIcon("lifecycleCo2Reduction").color} 
+                    className="mr-2" 
+                    size={16} 
+                  />
+                  Lifecycle CO₂ Reduction (%)
+                </Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">{metricTooltips.lifecycleCo2Reduction}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <Input
                 id="lifecycleCo2Reduction"
                 type="number"
@@ -588,6 +694,19 @@ export function ClimateImpactForm({
                 value={formData.lifecycleCo2Reduction}
                 onChange={(e) => handleCarbonFootprintChange("lifecycleCo2Reduction", Number(e.target.value))}
               />
+              <div className="pt-1">
+                <Label htmlFor="lifecycleCo2ReductionDescription" className="text-sm text-muted-foreground mb-1">
+                  Description (optional)
+                </Label>
+                <Textarea
+                  id="lifecycleCo2ReductionDescription"
+                  value={formData.lifecycleCo2ReductionDescription}
+                  onChange={(e) => handleCarbonFootprintChange("lifecycleCo2ReductionDescription", e.target.value)}
+                  placeholder="Add context or details about lifecycle CO₂ reduction..."
+                  className="mt-1"
+                  rows={2}
+                />
+              </div>
             </div>
           </div>
           <div className="space-y-2">
@@ -788,26 +907,26 @@ export function ClimateImpactForm({
                 </AccordionItem>
               );
             })}
-          </Accordion>
-        </CardContent>
-      </Card>
-
-      {/* Submit Button */}
-      <div className="flex justify-end space-x-4">
-        <Button type="submit" disabled={isSubmitting} className="flex items-center gap-2">
-          <ColoredIcon 
-            icon={defaultIcon.icon} 
-            color={defaultIcon.color} 
-            size={16} 
-          />
-          {isSubmitting ? 
-            "Saving..." : 
-            onSubmitType === "create" ? "Create Climate Impact" : "Update Climate Impact"
-          }
-        </Button>
-      </div>
-    </form>
-  );
-}
-
-export default ClimateImpactForm;
+            </Accordion>
+          </CardContent>
+        </Card>
+  
+        {/* Submit Button */}
+        <div className="flex justify-end space-x-4">
+          <Button type="submit" disabled={isSubmitting} className="flex items-center gap-2">
+            <ColoredIcon 
+              icon={defaultIcon.icon} 
+              color={defaultIcon.color} 
+              size={16} 
+            />
+            {isSubmitting ? 
+              "Saving..." : 
+              onSubmitType === "create" ? "Create Climate Impact" : "Update Climate Impact"
+            }
+          </Button>
+        </div>
+      </form>
+    );
+  }
+  
+  export default ClimateImpactForm;

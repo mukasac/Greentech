@@ -214,7 +214,7 @@ export function BlogEditForm({ blogId, startupId }: BlogEditFormProps) {
 
       <div className="mb-6">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/startups/dashboard/blog">
+          <Link href="/startups/dashboard/profile?tab=blog">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Blog Posts
           </Link>
