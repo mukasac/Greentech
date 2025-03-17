@@ -329,7 +329,8 @@ export interface Startup {
     sdgs: string[];
   };
   viewCount: number;
-  userId: string;
+  userId: string | null; // This field is important for checking if a startup is claimed
+
   team: TeamMember[];
   gallery: GalleryImage[];
   jobs: Job[];

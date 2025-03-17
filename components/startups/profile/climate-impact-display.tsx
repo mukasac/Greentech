@@ -89,6 +89,7 @@ interface ClimateImpactDisplayProps {
   climateImpacts?: StartupClimateImpact[];
   initialTab?: string; // Tab to display (controlled by parent component)
   standalone?: boolean; // Whether this is a standalone component or integrated with parent tabs
+  hideDescriptions?: boolean; // New prop to control hiding descriptions
 }
 
 // Define metric units - keeping all original content
@@ -436,13 +437,15 @@ function MetricCard({
   value, 
   label, 
   unit,
-  description
+  description,
+  hideDescriptions = false
 }: { 
   metricKey: string;
   value: string | number | null | undefined; 
   label: string; 
   unit: string;
   description?: string;
+  hideDescriptions?: boolean;
 }) {
   if (value === null || value === undefined) return null;
   
@@ -484,8 +487,8 @@ function MetricCard({
         {unit ? ` ${unit}` : ''}
       </div>
       
-     {/* Display the description if available */}
-     {description && (
+     {/* Display the description if available and not hidden */}
+     {description && !hideDescriptions && (
         <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
           {description}
         </p>
@@ -499,10 +502,12 @@ function CategoryCard({
   title, 
   metrics,
   id,
+  hideDescriptions = false
 }: { 
   title: string;
   metrics: MetricData[];
   id: string;
+  hideDescriptions?: boolean;
 }) {
   return (
     <div id={id} className="mb-5">
@@ -521,6 +526,7 @@ function CategoryCard({
                 value={metric.value}
                 unit={metric.unit}
                 description={metric.description}
+                hideDescriptions={hideDescriptions}
               />
             ))}
           </div>
@@ -587,7 +593,12 @@ function renderValue(value: any): string | undefined {
   return strValue.trim() === "" ? undefined : strValue;
 }
 
-export function ClimateImpactDisplay({ climateImpacts = [], initialTab = "overview", standalone = true }: ClimateImpactDisplayProps) {
+export function ClimateImpactDisplay({ 
+  climateImpacts = [], 
+  initialTab = "overview", 
+  standalone = true,
+  hideDescriptions = false 
+}: ClimateImpactDisplayProps) {
   // Early return if no climate impacts
   if (!climateImpacts || climateImpacts.length === 0) {
     return null;
@@ -786,7 +797,7 @@ export function ClimateImpactDisplay({ climateImpacts = [], initialTab = "overvi
                   color="#3b82f6"
                 />
                 
-                {impact.sdgImpact && impact.sdgImpact !== "" && (
+                {impact.sdgImpact && impact.sdgImpact !== "" && !hideDescriptions && (
                   <p className="text-sm text-slate-600 dark:text-slate-300 mt-3">
                     {renderValue(impact.sdgImpact)}
                   </p>
@@ -810,6 +821,7 @@ export function ClimateImpactDisplay({ climateImpacts = [], initialTab = "overvi
                     label={metric.label}
                     unit={metric.unit}
                     description={metric.description}
+                    hideDescriptions={hideDescriptions}
                   />
                 ))}
               </div>
@@ -855,6 +867,7 @@ export function ClimateImpactDisplay({ climateImpacts = [], initialTab = "overvi
                 id={`impact-${categoryKey}`}
                 title={categoryLabel}
                 metrics={metrics}
+                hideDescriptions={hideDescriptions}
               />
             );
           })}
@@ -884,6 +897,7 @@ export function ClimateImpactDisplay({ climateImpacts = [], initialTab = "overvi
                 id={`lifecycle-${categoryKey}`}
                 title={categoryLabel}
                 metrics={metrics}
+                hideDescriptions={hideDescriptions}
               />
             );
           })}
@@ -906,7 +920,7 @@ export function ClimateImpactDisplay({ climateImpacts = [], initialTab = "overvi
               </div>
             )}
             
-            {impact.awards && impact.awards !== "" && (
+            {impact.awards && impact.awards !== "" && !hideDescriptions && (
               <div>
                 <h4 className="text-base font-medium mb-2">Awards & Recognition</h4>
                 <p className="text-sm text-slate-600 dark:text-slate-300">
@@ -930,6 +944,7 @@ export function ClimateImpactDisplay({ climateImpacts = [], initialTab = "overvi
                 label="Carbon Captured"
                 unit="tons/year"
                 description={getMetricDescription('carbonCaptured')}
+                hideDescriptions={hideDescriptions}
               />
             )}
             
@@ -940,11 +955,12 @@ export function ClimateImpactDisplay({ climateImpacts = [], initialTab = "overvi
                 label="Lifecycle CO₂ Reduction"
                 unit="%"
                 description={getMetricDescription('lifecycleCo2Reduction')}
+                hideDescriptions={hideDescriptions}
               />
             )}
           </div>
           
-          {impact.offsetPrograms && impact.offsetPrograms !== "" && (
+          {impact.offsetPrograms && impact.offsetPrograms !== "" && !hideDescriptions && (
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-medium">Offset Programs</CardTitle>

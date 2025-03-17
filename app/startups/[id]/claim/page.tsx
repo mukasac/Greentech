@@ -5,24 +5,23 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ClaimRegisterForm } from "@/components/auth/claim-register-form";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, CheckCircle, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ClaimStartupPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [startup, setStartup] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // If user is logged in, we'll handle the claim differently
-    if (status === "authenticated") {
-      handleLoggedInClaim();
-      return;
-    }
-
-    // Fetch startup details to display name
+    // Fetch startup details to display name and check if already claimed
     const fetchStartup = async () => {
       try {
         const response = await fetch(`/api/startups/${params.id}`);
@@ -31,29 +30,31 @@ export default function ClaimStartupPage({ params }: { params: { id: string } })
         }
         const data = await response.json();
         setStartup(data);
+        
+        // If startup is already claimed, redirect to profile
+        if (data.userId) {
+          setError("This startup has already been claimed");
+          setTimeout(() => {
+            router.push(`/startups/${params.id}`);
+          }, 3000);
+        }
       } catch (error) {
         console.error("Error fetching startup:", error);
+        setError("Failed to load startup details");
       } finally {
         setLoading(false);
       }
     };
 
     fetchStartup();
-  }, [params.id, status]);
+  }, [params.id, router]);
 
   const handleLoggedInClaim = async () => {
+    setIsSubmitting(true);
+    setError(null);
+    
     try {
-      setLoading(true);
-      
-      // Fetch startup details
-      const startupResponse = await fetch(`/api/startups/${params.id}`);
-      if (!startupResponse.ok) {
-        throw new Error("Failed to fetch startup");
-      }
-      const startupData = await startupResponse.json();
-      setStartup(startupData);
-      
-      // Make claim request directly since user is already logged in
+      // Make claim request
       const response = await fetch(`/api/startups/${params.id}/claim`, {
         method: "POST",
         headers: {
@@ -66,13 +67,17 @@ export default function ClaimStartupPage({ params }: { params: { id: string } })
         throw new Error(data.error || "Failed to claim startup");
       }
 
-      // Redirect to dashboard on success
-      router.push("/startups/dashboard");
+      setSuccess("Startup claimed successfully! You now have ownership access.");
+      
+      // Redirect to dashboard on success after a delay
+      setTimeout(() => {
+        router.push("/startups/dashboard");
+      }, 2000);
     } catch (error) {
       console.error("Error claiming startup:", error);
-      // Still set loading to false to show error state
+      setError(error instanceof Error ? error.message : "Failed to claim startup");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -127,12 +132,71 @@ export default function ClaimStartupPage({ params }: { params: { id: string } })
             <CardTitle>Claim {startup.name}</CardTitle>
             <CardDescription>
               {status === "authenticated" 
-                ? "You're already logged in. We're processing your claim request."
+                ? "Verify your information and submit to claim this startup"
                 : "Register an account to claim this startup."}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {status === "unauthenticated" && (
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {success && (
+              <Alert className="mb-6 border-green-200 bg-green-50 text-green-800">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <AlertTitle>Success</AlertTitle>
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+
+            {status === "authenticated" ? (
+              <>
+                <div className="mb-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="h-12 w-12 overflow-hidden rounded-lg border bg-white p-1">
+                      <Image
+                        src={startup.logo || "/placeholder-logo.png"}
+                        alt={startup.name}
+                        width={48}
+                        height={48}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{startup.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Founded {startup.founded} • {startup.country}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Alert className="mb-6">
+                  <Shield className="h-4 w-4" />
+                  <AlertTitle>Verification Required</AlertTitle>
+                  <AlertDescription>
+                    By claiming this startup, you confirm that you are an authorized representative of {startup.name}. 
+                    Our team may contact you to verify your affiliation.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="flex justify-end space-x-4">
+                  <Button variant="outline" asChild>
+                    <Link href={`/startups/${params.id}`}>Cancel</Link>
+                  </Button>
+                  <Button
+                    onClick={handleLoggedInClaim}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Processing..." : "Claim Startup"}
+                  </Button>
+                </div>
+              </>
+            ) : (
               <ClaimRegisterForm startupId={params.id} />
             )}
           </CardContent>

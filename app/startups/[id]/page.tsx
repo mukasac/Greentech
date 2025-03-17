@@ -599,7 +599,12 @@ export default function StartupProfilePage({ params }: { params: { id: string } 
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="p-4">
-                          <ClimateImpactDisplay climateImpacts={startup.climateImpacts} initialTab="overview" standalone={false} />
+                          <ClimateImpactDisplay 
+                            climateImpacts={startup.climateImpacts} 
+                            initialTab="overview" 
+                            standalone={false}
+                            hideDescriptions={true} 
+                          />
                         </CardContent>
                         <CardFooter className="pt-0 pb-4 px-4 flex justify-center">
                           <Button 
@@ -1037,9 +1042,6 @@ export default function StartupProfilePage({ params }: { params: { id: string } 
                                   </div>
                                   <h3 className="font-medium">Impact Metrics</h3>
                                 </div>
-                                <p className="text-sm text-muted-foreground mb-3">
-                                  Detailed measurements of environmental impact across various categories.
-                                </p>
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
@@ -1059,9 +1061,6 @@ export default function StartupProfilePage({ params }: { params: { id: string } 
                                   </div>
                                   <h3 className="font-medium">Lifecycle Assessment</h3>
                                 </div>
-                                <p className="text-sm text-muted-foreground mb-3">
-                                  Product lifecycle sustainability from materials to end-of-life.
-                                </p>
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
@@ -1081,9 +1080,6 @@ export default function StartupProfilePage({ params }: { params: { id: string } 
                                   </div>
                                   <h3 className="font-medium">Certifications & Awards</h3>
                                 </div>
-                                <p className="text-sm text-muted-foreground mb-3">
-                                  Recognized standards and achievements in sustainability.
-                                </p>
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
@@ -1103,9 +1099,6 @@ export default function StartupProfilePage({ params }: { params: { id: string } 
                                   </div>
                                   <h3 className="font-medium">Carbon Impact</h3>
                                 </div>
-                                <p className="text-sm text-muted-foreground mb-3">
-                                  Carbon reduction, capture, and offset initiatives.
-                                </p>
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
